@@ -21,8 +21,8 @@ searxng_build_path: "{{ searxng_data_path }}/build"
 searxng_config_path: "{{ searxng_data_path }}/config"
 searxng_uploads_path: "{{ searxng_data_path }}/uploads"
 
-# renovate: datasource=docker depName=ghcr.io/searxng/searxng
-searxng_version: 4.6.1
+# The service has neither releases nor tags; its image is created for each commit
+searxng_version: latest
 
 searxng_uid: ""
 searxng_gid: ""
@@ -43,7 +43,7 @@ searxng_container_image: "{{ searxng_container_image_registry_prefix }}searxng/s
 searxng_container_image_tag: "{{ searxng_version }}"
 searxng_container_image_registry_prefix: "{{ searxng_container_image_registry_prefix_upstream }}"
 searxng_container_image_registry_prefix_upstream: "{{ searxng_container_image_registry_prefix_upstream_default }}"
-searxng_container_image_registry_prefix_upstream_default: ghcr.io/
+searxng_container_image_registry_prefix_upstream_default: docker.io/
 searxng_container_image_force_pull: "{{ searxng_container_image.endswith(':latest') }}"
 
 searxng_container_image_self_build: false

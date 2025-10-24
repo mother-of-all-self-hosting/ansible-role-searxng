@@ -1,0 +1,59 @@
+#jinja2: lstrip_blocks: "True"
+[Unit]
+Description=SearXNG ({{ searxng_identifier }})
+{% for service in searxng_systemd_required_services_list %}
+Requires={{ service }}
+After={{ service }}
+{% endfor %}
+DefaultDependencies=no
+
+[Service]
+Type=simple
+Environment="HOME={{ devture_systemd_docker_base_systemd_unit_home_path }}"
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} kill {{ searxng_identifier }} 2>/dev/null || true'
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ searxng_identifier }} 2>/dev/null || true'
+
+ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
+			--rm \
+			--name={{ searxng_identifier }} \
+			--user={{ searxng_uid }}:{{ searxng_gid }} \
+			--log-driver=none \
+			--cap-drop=ALL \
+			--cap-add=CHOWN \
+			--cap-add=FOWNER \
+			--cap-add=setgid \
+			--cap-add=setuid \
+			--network={{ searxng_container_network }} \
+			--hostname={{ searxng_container_hostname }} \
+			{% if searxng_container_http_host_bind_port %}
+			-p {{ searxng_container_http_host_bind_port }}:{{ searxng_container_http_port }} \
+			{% endif %}
+			--env-file={{ searxng_base_path }}/env \
+			--label-file={{ searxng_base_path }}/labels \
+			--health-interval={{ searxng_container_health_interval }} \
+			--mount type=bind,src={{ searxng_config_path }},dst=/etc/searxng \
+			--mount	type=bind,src=/etc/passwd,dst=/etc/passwd,readonly \
+			--tmpfs=/tmp:rw,noexec,nosuid,size=1024m \
+			{% for volume in searxng_container_additional_volumes %}
+			--mount type={{ volume.type | default('bind' if '/' in volume.src else 'volume') }},src={{ volume.src }},dst={{ volume.dst }}{{ (',' + volume.options) if volume.options | default('') else '' }} \
+			{% endfor %}
+			{% for arg in searxng_container_extra_arguments %}
+			{{ arg }} \
+			{% endfor %}
+			{{ searxng_container_image }}
+
+{% for network in searxng_container_additional_networks %}
+ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ searxng_identifier }}
+{% endfor %}
+
+ExecStart={{ devture_systemd_docker_base_host_command_docker }} start --attach {{ searxng_identifier }}
+
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} kill {{ searxng_identifier }} 2>/dev/null || true'
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ searxng_identifier }} 2>/dev/null || true'
+
+Restart=always
+RestartSec=30
+SyslogIdentifier={{ searxng_identifier }}
+
+[Install]
+WantedBy=multi-user.target

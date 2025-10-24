@@ -1,0 +1,19 @@
+galaxy_info:
+  author: Sergio Durigan Junior
+  role_name: searxng
+  description: SearXNG - Privacy-respecting, hackable metasearch engine
+  platforms:
+    - name: Debian
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Archlinux
+      versions:
+        - all
+    - name: EL
+      versions:
+        - 7
+  license: GPL-3.0-or-later
+  min_ansible_version: '2.1'

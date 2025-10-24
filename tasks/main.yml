@@ -1,0 +1,23 @@
+---
+
+- block:
+    - when: searxng_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
+
+    - when: searxng_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/prepare_basic_auth.yml"
+
+    - when: searxng_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
+  tags:
+    - setup-all
+    - setup-searxng
+    - install-all
+    - install-searxng
+
+- block:
+    - when: not searxng_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
+  tags:
+    - setup-all
+    - setup-searxng

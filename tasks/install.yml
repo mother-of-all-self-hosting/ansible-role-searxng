@@ -1,0 +1,73 @@
+---
+
+- name: Ensure SearXNG paths exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0751
+    owner: "{{ searxng_uid }}"
+    group: "{{ searxng_gid }}"
+  with_items:
+    - "{{ searxng_base_path }}"
+    - "{{ searxng_config_path }}"
+
+- name: Ensure SearXNG support files are installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "{{ searxng_base_path }}/{{ item }}"
+    mode: 0640
+    owner: "{{ searxng_uid }}"
+    group: "{{ searxng_gid }}"
+  with_items:
+    - env
+    - labels
+
+- name: Ensure SearXNG configuration files are installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/config/{{ item }}.j2"
+    dest: "{{ searxng_config_path }}/{{ item }}"
+    mode: 0640
+    owner: "{{ searxng_uid }}"
+    group: "{{ searxng_gid }}"
+  with_items:
+    - settings.yml
+    - limiter.toml
+
+- name: Ensure SearXNG container image is pulled via community.docker.docker_image
+  when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
+  community.docker.docker_image:
+    name: "{{ searxng_container_image }}"
+    source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
+    force_source: "{{ searxng_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
+    force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else searxng_container_image_force_pull }}"
+  register: result
+  retries: "{{ devture_playbook_help_container_retries_count }}"
+  delay: "{{ devture_playbook_help_container_retries_delay }}"
+  until: result is not failed
+
+- name: Ensure SearXNG container image is pulled via command
+  when: devture_systemd_docker_base_container_image_pull_method == 'command'
+  ansible.builtin.command:
+    cmd: "{{ devture_systemd_docker_base_host_command_docker }} pull {{ searxng_container_image }}"
+  register: result
+  retries: "{{ devture_playbook_help_container_retries_count }}"
+  delay: "{{ devture_playbook_help_container_retries_delay }}"
+  until: result is not failed
+
+- name: Ensure SearXNG container network is created via community.docker.docker_network
+  when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
+  community.general.docker_network:
+    name: "{{ searxng_container_network }}"
+    driver: bridge
+
+- name: Ensure SearXNG container network exists via command
+  when: devture_systemd_docker_base_container_network_creation_method == 'command'
+  ansible.builtin.command:
+    cmd: "{{ devture_systemd_docker_base_host_command_docker }} network create {{ searxng_container_network }}"
+  register: network_creation_result
+  failed_when: network_creation_result.rc != 0 and 'already exists' not in network_creation_result.stderr
+
+- name: Ensure SearXNG systemd service is present
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/systemd/searxng.service.j2"
+    dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ searxng_identifier }}.service"

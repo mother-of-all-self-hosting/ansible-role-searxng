@@ -1,0 +1,43 @@
+---
+
+- name: Fail if required SearXNG settings not defined
+  ansible.builtin.fail:
+    msg: >
+      You need to define a required configuration setting (`{{ item }}`).
+  when: "vars[item] == ''"
+  with_items:
+    - searxng_identifier
+    - searxng_uid
+    - searxng_gid
+    - searxng_hostname
+    - searxng_path_prefix
+    - searxng_scheme
+    - searxng_base_url
+    - searxng_container_network
+    - searxng_instance_name
+
+- name: Check if Valkey is configured when using rate limiter
+  when: searxng_enable_rate_limiter | bool and searxng_rate_limiter_config_valkey_hostname == ''
+  ansible.builtin.fail:
+    msg: >
+      You need to configure Valkey when the SearXNG rate limiter is enabled (`searxng_rate_limiter_config_valkey_hostname`).
+
+- when: searxng_container_labels_traefik_enabled | bool
+  block:
+    - name: Fail if required SearxNG Traefik settings not defined
+      ansible.builtin.fail:
+        msg: >-
+          You need to define a required configuration setting (`{{ item }}`).
+      when: "vars[item] == ''"
+      with_items:
+        - searxng_container_labels_traefik_hostname
+        - searxng_container_labels_traefik_path_prefix
+
+    # We ensure it doesn't end with a slash, because we handle both (slash and no-slash).
+    # Knowing that `searxng_container_labels_traefik_path_prefix` does not end with a slash
+    # ensures we know how to set these routes up without having to do "does it end with a slash" checks elsewhere.
+    - name: Fail if SearXNG_container_labels_traefik_path_prefix ends with a slash
+      ansible.builtin.fail:
+        msg: >-
+          searxng_container_labels_traefik_path_prefix (`{{ searxng_container_labels_traefik_path_prefix }}`) must either be `/` or not end with a slash (e.g. `/searxng`).
+      when: "searxng_container_labels_traefik_path_prefix != '/' and searxng_container_labels_traefik_path_prefix[-1] == '/'"

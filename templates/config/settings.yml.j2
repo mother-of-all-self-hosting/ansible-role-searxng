@@ -1,0 +1,20 @@
+# see https://docs.searxng.org/admin/settings/settings.html#settings-use-default-settings
+use_default_settings: true
+general:
+  instance_name: {{ searxng_instance_name | to_yaml }}
+server:
+  secret_key: {{ searxng_secret_key | to_yaml }}
+  limiter: {{ searxng_enable_rate_limiter | to_yaml }}
+  image_proxy: {{ searxng_enable_image_proxy | to_yaml }}
+  public_instance: {{ searxng_public_instance | to_yaml }}
+  base_url: {{ searxng_base_url| to_yaml }}
+search:
+  autocomplete: {{ searxng_autocomplete | to_yaml }}
+ui:
+  static_use_hash: true
+{% if searxng_enable_rate_limiter %}
+redis:
+  url: redis://{{ searxng_rate_limiter_config_valkey_hostname }}
+{% endif %}
+
+{{ searxng_extra_configuration_snippets }}

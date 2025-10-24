@@ -75,8 +75,6 @@ If you are looking for an Ansible role for Valkey, you can check out [ansible-ro
 To enable the rate limiter with Valkey, add the following configuration to your `vars.yml` file:
 
 ```yaml
-searxng_config_server_limiter: true
-
 searxng_redis_hostname: YOUR_REDIS_SERVER_HOSTNAME_HERE
 searxng_redis_port: 6379
 searxng_redis_database: 0

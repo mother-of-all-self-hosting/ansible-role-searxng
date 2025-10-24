@@ -191,9 +191,6 @@ searxng_config_searxng_instance_name: SearXNG
 # Specify a random string generated with `pwgen -s 64 1` or in another way
 searxng_config_server_secret_key: ""
 
-# Control if the rate limiter is enabled
-searxng_config_server_limiter: true
-
 # Control if proxying images is enabled
 searxng_config_server_image_proxy: true
 

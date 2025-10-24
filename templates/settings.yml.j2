@@ -11,10 +11,12 @@ general:
   instance_name: {{ searxng_config_searxng_instance_name | to_yaml }}
 server:
   secret_key: {{ searxng_config_server_secret_key | to_yaml }}
-  limiter: {{ searxng_config_server_limiter | to_yaml }}
+{% if searxng_redis_hostname %}
+  limiter: true
+{% endif %}
   image_proxy: {{ searxng_config_server_image_proxy | to_yaml }}
   public_instance: {{ searxng_config_public_instance | to_yaml }}
-{% if searxng_config_server_limiter %}
+{% if searxng_redis_hostname %}
 valkey:
   url: valkey://{{ searxng_redis_hostname }}:{{ searxng_redis_port }}/{{ searxng_redis_database }}
 {% endif %}

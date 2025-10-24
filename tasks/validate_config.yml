@@ -15,7 +15,7 @@
   with_items:
     - { "old": "searxng_instance_name", "new": "searxng_config_searxng_instance_name" }
     - { "old": "searxng_secret_key", "new": "searxng_config_server_secret_key" }
-    - { "old": "searxng_enable_rate_limiter", "new": "searxng_config_server_limiter" }
+    - { "old": "searxng_enable_rate_limiter", "new": "<Removed; setting `searxng_redis_hostname` enables the rate limiter>" }
     - { "old": "searxng_enable_image_proxy", "new": "searxng_config_server_image_proxy" }
     - { "old": "searxng_public_instance", "new": "searxng_config_public_instance" }
     - { "old": "searxng_extra_configuration_snippets", "new": "searxng_config_additional_configurations" }

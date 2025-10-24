@@ -20,7 +20,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Setting up SearXNG
 
-This is an [Ansible](https://www.ansible.com/) role which installs an [SearXNG](https://github.com/SearXNG/SearXNG/) server to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
+This is an [Ansible](https://www.ansible.com/) role which installs an [SearXNG](https://github.com/searxng/searxng-docker/) server to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
 SearXNG is a Node.js based free forum software.
 

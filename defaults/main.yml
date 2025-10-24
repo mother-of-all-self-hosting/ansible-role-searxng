@@ -8,7 +8,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-# Project source code URL: https://github.com/SearXNG/SearXNG
+# Project source code URL: https://github.com/searxng/searxng-docker
 
 searxng_enabled: true
 

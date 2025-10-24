@@ -22,7 +22,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 This is an [Ansible](https://www.ansible.com/) role which installs an [SearXNG](https://github.com/searxng/searxng-docker/) server to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
-SearXNG is a Node.js based free forum software.
+SearXNG is a privacy-respecting, hackable [metasearch engine](https://en.wikipedia.org/wiki/Metasearch_engine).
 
 See the project's [documentation](https://docs.searxng.org/) to learn what SearXNG does and why it might be useful to you.
 
@@ -68,7 +68,7 @@ searxng_config_server_secret_key: YOUR_SECRET_KEY_HERE
 
 ### Enabling rate limiter with a Valkey server (optional)
 
-Also, you can optionally enable the [rate limiter](https://docs.searxng.org/admin/searx.limiter.html) with a [Valkey](https://redis.io/) server.
+Also, you can optionally enable the [rate limiter](https://docs.searxng.org/admin/searx.limiter.html) with a [Valkey](https://valkey.io/) server.
 
 If you are looking for an Ansible role for Valkey, you can check out [ansible-role-valkey](https://github.com/mother-of-all-self-hosting/ansible-role-valkey) maintained by the [Mother-of-All-Self-Hosting (MASH)](https://github.com/mother-of-all-self-hosting) team.
 
@@ -88,7 +88,9 @@ There are some additional things you may wish to configure about the component.
 
 Take a look at:
 
-- [`defaults/main.yml`](../defaults/main.yml) for some variables that you can customize via your `vars.yml` file. You can override settings (even those that don't have dedicated playbook variables) using the `searxng_environment_variables_additional_variables` variable
+- [`defaults/main.yml`](../defaults/main.yml) for some variables that you can customize via your `vars.yml` file. You can override settings (even those that don't have dedicated playbook variables) using the `searxng_config_additional_configurations` variable
+
+See the [documentation](https://docs.searxng.org/admin/settings/index.html) for a complete list of SearXNG's config options that you could put in `searxng_config_additional_configurations`.
 
 ## Installing
 
@@ -104,13 +106,7 @@ If you use the MASH playbook, the shortcut commands with the [`just` program](ht
 
 After running the command for installation, SearXNG becomes available at the specified hostname like `https://example.com`.
 
-To get started, open the URL with a web browser, and follow the set up wizard. Some of the details for the database are automatically specified.
-
-On the wizard UI, **the scheme (`HTTPS` or `HTTP`) for the public facing URL is sometimes not detected properly**. Make sure that the correct one is specified, and set it manually if not. The service works even if the correct one is not set, but certain plugins such as [`searxng-plugin-2factor`](https://github.com/julianlam/searxng-plugin-2factor) will not work as expected, as WebAuthn requires the canonical URL to being on the secure contexts (HTTPS).
-
 ## Troubleshooting
-
-The official forum is available at <https://community.searxng.org/>.
 
 ### Check the service's logs
 

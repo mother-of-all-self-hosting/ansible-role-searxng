@@ -191,5 +191,8 @@ searxng_redis_hostname: ""
 searxng_redis_port: 6379
 searxng_redis_database: 0
 
+# Additional configurations for rate limiter on limiter.toml
+searxng_limiter_additional_configurations: ""
+
 # Additional environment variables.
 searxng_environment_variables_additional_variables: ""

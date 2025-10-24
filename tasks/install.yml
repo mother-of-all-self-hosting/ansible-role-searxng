@@ -27,7 +27,7 @@
     - env
     - labels
 
-- name: Ensure SearXNG settings file installed
+- name: Ensure SearXNG configuration files installed
   ansible.builtin.template:
     src: "{{ role_path }}/templates/{{ item }}.j2"
     dest: "{{ searxng_data_path }}/{{ item }}"
@@ -36,6 +36,7 @@
     group: "{{ searxng_gid }}"
   with_items:
     - settings.yml
+    - limiter.toml
 
 - name: Run if self-building of SearXNG container image is not enabled
   when: "not searxng_container_image_self_build | bool"

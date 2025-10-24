@@ -1,15 +1,25 @@
-# SearXNG Ansible role
+<!--
+SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+SPDX-FileCopyrightText: 2025 Suguru Hirahara
 
-This is an [Ansible](https://www.ansible.com/) role which installs [SearXNG](https://github.com/searxng/searxng) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
+# NodeBB Ansible role
+
+This is an [Ansible](https://www.ansible.com/) role which installs an [NodeBB](https://github.com/NodeBB/NodeBB/) server to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
 This role *implicitly* depends on:
 
 - [`com.devture.ansible.role.playbook_help`](https://github.com/devture/com.devture.ansible.role.playbook_help)
 - [`com.devture.ansible.role.systemd_docker_base`](https://github.com/devture/com.devture.ansible.role.systemd_docker_base)
 
-For an Ansible playbook which integrates this role and makes it easier to use, see the [mash-playbook](https://github.com/mother-of-all-self-hosting/mash-playbook).
+Check [defaults/main.yml](defaults/main.yml) for the full list of supported options.
 
-## Notice
+💡 See this [document](docs/configuring-nodebb.md) for details about setting up the service with this role.
 
-This repository was restored from the galaxy-pulled role when the original repository at https://git.sergiodj.net/sergiodj/ansible-role-searxng.git was down due to server issues.
-The git tag `v1.0.0-0` represents the unmodified state of the original repository's role at the time of restoration.
+## Development
+
+You can optionally install [pre-commit](https://pre-commit.com/) so that simple mistakes are checked and noticed before changes are pushed to a remote branch. See [`.pre-commit-config.yaml`](./.pre-commit-config.yaml) for which hooks are to be executed.
+
+See [this section](https://pre-commit.com/#usage) on the official documentation for usage.

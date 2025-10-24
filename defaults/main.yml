@@ -1,194 +1,130 @@
+# SPDX-FileCopyrightText: 2023 - 2024 Nikita Chernyi
+# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2024 Julian-Samuel Gebühr
+# SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
+# SPDX-FileCopyrightText: 2025 MASH project contributors
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 ---
+# Project source code URL: https://github.com/NodeBB/NodeBB
 
-# Project source code URL: https://github.com/searxng/searxng
+nodebb_enabled: true
 
-searxng_enabled: true
+nodebb_identifier: nodebb
+nodebb_base_path: "/{{ nodebb_identifier }}"
+nodebb_data_path: "{{ nodebb_base_path }}/data"
 
-searxng_identifier: searxng
+# Managed in `nodebb_data_path`
+nodebb_build_path: "{{ nodebb_data_path }}/build"
+nodebb_config_path: "{{ nodebb_data_path }}/config"
+nodebb_uploads_path: "{{ nodebb_data_path }}/uploads"
 
-# Upstream doesn't release versioned images, so we have to stick with
-# "latest" here.
-searxng_version: latest
+# renovate: datasource=docker depName=ghcr.io/nodebb/nodebb
+nodebb_version: 4.6.1
 
-# The scheme with which SearXNG will be served.
-searxng_scheme: "https"
+nodebb_uid: ""
+nodebb_gid: ""
 
-# The hostname at which SearXNG is served.
-searxng_hostname: ''
+nodebb_scheme: https
 
-# The path at which SearXNG is served.
-# This value must either be `/` or not end with a slash (e.g. `/searxng`).
-searxng_path_prefix: /
+# The hostname at which NodeBB is served.
+nodebb_hostname: ""
 
-# The base URL for the instance.
-searxng_base_url: "{{ searxng_scheme }}://{{ searxng_hostname }}{{ searxng_path_prefix }}"
+# The path at which NodeBB is exposed.
+# This value must either be `/` or not end with a slash (e.g. `/nodebb`).
+#
+# Hosting NodeBB under a subpath does not seem to be possible due to NodeBB's
+# technical limitations.
+nodebb_path_prefix: /
 
-searxng_uid: ''
-searxng_gid: ''
+nodebb_container_image: "{{ nodebb_container_image_registry_prefix }}nodebb/nodebb:{{ nodebb_container_image_tag }}"
+nodebb_container_image_tag: "{{ nodebb_version }}"
+nodebb_container_image_registry_prefix: "{{ nodebb_container_image_registry_prefix_upstream }}"
+nodebb_container_image_registry_prefix_upstream: "{{ nodebb_container_image_registry_prefix_upstream_default }}"
+nodebb_container_image_registry_prefix_upstream_default: ghcr.io/
+nodebb_container_image_force_pull: "{{ nodebb_container_image.endswith(':latest') }}"
 
-searxng_base_path: "/{{ searxng_identifier }}"
-searxng_config_path: "{{ searxng_base_path }}/config"
+nodebb_container_image_self_build: false
+nodebb_container_image_self_build_name: "nodebb/nodebb:{{ nodebb_container_image_self_build_repo_version }}"
+nodebb_container_image_self_build_repo: "https://github.com/nodebb/nodebb.git"
+nodebb_container_image_self_build_repo_version: "{{ 'v' + nodebb_version if nodebb_version != 'latest' else 'master' }}"
+nodebb_container_image_self_build_src_files_path: "{{ nodebb_base_path }}/docker-src"
 
-searxng_container_image: "{{ searxng_container_image_registry_prefix }}searxng/searxng:{{ searxng_container_image_tag }}"
-searxng_container_image_registry_prefix: docker.io/
-searxng_container_image_tag: "{{ searxng_version }}"
-searxng_container_image_force_pull: "{{ searxng_container_image.endswith(':latest') }}"
+# Controls whether the container exposes its HTTP port (tcp/80 in the container).
+#
+# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
+nodebb_container_http_host_bind_port: ""
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
-searxng_container_network: "{{ searxng_identifier }}"
+nodebb_container_network: "{{ nodebb_identifier }}"
+
+# The port number in the container
+nodebb_container_http_port: 4567
 
 # A list of additional container networks that the container would be connected to.
 # The role does not create these networks, so make sure they already exist.
 # Use this to expose this container to another reverse proxy, which runs in a different container network.
-searxng_container_additional_networks: "{{ searxng_container_additional_networks_auto + searxng_container_additional_networks_custom }}"
-searxng_container_additional_networks_auto: []
-searxng_container_additional_networks_custom: []
-
-# The instance name.
-searxng_instance_name: ''
-
-# The autocomplete backend to use.
-#
-# Existing autocomplete backends: "dbpedia", "duckduckgo", "google", "yandex", "mwmbl",
-# "seznam", "startpage", "stract", "swisscows", "qwant", "wikipedia".
-#
-# Leave blank to turn it off.
-searxng_autocomplete: ''
-
-# The secret key of this instance.
-#
-# You can generate a key using "openssl rand -hex 32".
-searxng_secret_key: ''
-
-# Whether to rate limit the number of requests on the instance.
-#
-# This can be disabled if you're running a private instance.
-#
-# Note that the rate limiter also requires a valkey database.
-searxng_enable_rate_limiter: false
-
-# When the rate limiter is enabled, you can provide extra
-# configuration here.
-#
-# See https://github.com/searxng/searxng/blob/master/searx/limiter.toml
-# for an example file.
-searxng_rate_limiter_extra_configuration: ''
-
-# When the rate limiter is enabled, you must also provide a valkey
-# database.
-searxng_rate_limiter_config_valkey_hostname: ''
-
-# Whether to proxy image results through SearXNG.
-searxng_enable_image_proxy: true
-
-# Whether this is a public SearXNG instance.
-searxng_public_instance: false
-
-# You can provide extra configuration snippets here.
-#
-# See https://github.com/searxng/searxng/blob/master/searx/settings.yml
-# for an example file.
-searxng_extra_configuration_snippets: ''
-
-# searxng_basic_auth_enabled controls whether HTTP Basic Auth is enabled.
-# Also see `searxng_container_label_basicauth_users`.
-searxng_basic_auth_enabled: false
-searxng_basic_auth_username: ''
-searxng_basic_auth_password: ''
-# searxng_container_label_basicauth_users is populated at runtime based on
-# searxng_basic_auth_username and searxng_basic_auth_password
-searxng_container_label_basicauth_users: ''
-searxng_basic_auth_apache_container_image: "{{ searxng_basic_auth_apache_container_image_registry_prefix }}httpd:{{ searxng_basic_auth_apache_container_image_tag }}"
-searxng_basic_auth_apache_container_image_tag: "2.4.56-alpine3.17"
-searxng_basic_auth_apache_container_image_force_pull: "{{ searxng_basic_auth_apache_container_image.endswith(':latest') }}"
-searxng_basic_auth_apache_container_image_registry_prefix: docker.io/
-
-searxng_container_http_port: 8080
-# Controls whether the searxng container exposes its HTTP port (as
-# defined by `searxng_container_http_port`).
-#
-# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:8731"), or
-# empty string to not expose.
-searxng_container_http_host_bind_port: ""
-
-# searxng_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
-# See `../templates/labels.j2` for details.
-#
-# To inject your own other container labels, see `searxng_container_labels_additional_labels`.
-searxng_container_labels_traefik_enabled: true
-searxng_container_labels_traefik_docker_network: "{{ searxng_container_network }}"
-searxng_container_labels_traefik_hostname: "{{ searxng_hostname }}"
-# The path prefix must either be `/` or not end with a slash (e.g. `/searxng`).
-searxng_container_labels_traefik_path_prefix: "{{ searxng_path_prefix }}"
-searxng_container_labels_traefik_rule: "Host(`{{ searxng_container_labels_traefik_hostname }}`){% if searxng_container_labels_traefik_path_prefix != '/' %} && PathPrefix(`{{ searxng_container_labels_traefik_path_prefix }}`){% endif %}"
-searxng_container_labels_traefik_priority: 0
-searxng_container_labels_traefik_entrypoints: web-secure
-searxng_container_labels_traefik_tls: "{{ searxng_container_labels_traefik_entrypoints != 'web' }}"
-searxng_container_labels_traefik_tls_certResolver: default  # noqa var-naming
-
-# Controls which additional headers to attach to all HTTP requests.
-# To add your own custom request headers, use `searxng_container_labels_traefik_additional_response_headers_custom`
-searxng_container_labels_traefik_additional_request_headers: "{{ searxng_container_labels_traefik_additional_request_headers_auto | combine(searxng_container_labels_traefik_additional_request_headers_custom) }}"
-searxng_container_labels_traefik_additional_request_headers_auto: {}
-searxng_container_labels_traefik_additional_request_headers_custom: {}
-
-# Controls which additional headers to attach to all HTTP responses.
-# To add your own custom response headers, use `searxng_container_labels_traefik_additional_response_headers_custom`
-searxng_container_labels_traefik_additional_response_headers: "{{ searxng_container_labels_traefik_additional_response_headers_auto | combine(searxng_container_labels_traefik_additional_response_headers_custom) }}"
-searxng_container_labels_traefik_additional_response_headers_auto: |
-  {{
-    {}
-    | combine ({'X-XSS-Protection': searxng_http_header_xss_protection} if searxng_http_header_xss_protection else {})
-    | combine ({'X-Frame-Options': searxng_http_header_frame_options} if searxng_http_header_frame_options else {})
-    | combine ({'X-Content-Type-Options': searxng_http_header_content_type_options} if searxng_http_header_content_type_options else {})
-    | combine ({'Content-Security-Policy': searxng_http_header_content_security_policy} if searxng_http_header_content_security_policy else {})
-    | combine ({'Permission-Policy': searxng_http_header_content_permission_policy} if searxng_http_header_content_permission_policy else {})
-    | combine ({'Strict-Transport-Security': searxng_http_header_strict_transport_security} if searxng_http_header_strict_transport_security and searxng_container_labels_traefik_tls else {})
-  }}
-searxng_container_labels_traefik_additional_response_headers_custom: {}
-
-# searxng_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
-# See `../templates/labels.j2` for details.
-#
-# Example:
-# searxng_container_labels_additional_labels: |
-#   my.label=1
-#   another.label="here"
-searxng_container_labels_additional_labels: ''
-
-# Specifies how often the container health-check will run.
-#
-# For Traefik based setups, it's important that the interval is short,
-# because the interval value also specifies the "initial wait time".
-# This is a Docker (moby) bug: https://github.com/moby/moby/issues/33410
-# Without a successful healthcheck, Traefik will not register the service for reverse-proxying.
-# Thus, the health interval determines the initial start-up time -- the smaller, the better.
-#
-# For non-Traefik setups, we use the default healthcheck interval (60s) to decrease overhead.
-searxng_container_health_interval: "{{ '5s' if searxng_container_labels_traefik_enabled else '60s' }}"
-
-searxng_container_hostname: "{{ searxng_hostname }}"
+nodebb_container_additional_networks: "{{ nodebb_container_additional_networks_auto + nodebb_container_additional_networks_custom }}"
+nodebb_container_additional_networks_auto: []
+nodebb_container_additional_networks_custom: []
 
 # A list of additional "volumes" to mount in the container.
-#
+# This list gets populated dynamically at runtime. You can provide a different default value,
+# if you wish to mount your own files into the container.
+# Contains definition objects like this: `{"type": "bind", "src": "/outside", "dst": "/inside", "options": "readonly"}.
 # See the `--mount` documentation for the `docker run` command.
+nodebb_container_additional_volumes: "{{ nodebb_container_additional_volumes_auto + nodebb_container_additional_volumes_custom }}"
+nodebb_container_additional_volumes_auto: []
+nodebb_container_additional_volumes_custom: []
+
+# nodebb_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
+# See `../templates/labels.j2` for details.
+#
+# To inject your own other container labels, see `nodebb_container_labels_additional_labels`.
+nodebb_container_labels_traefik_enabled: true
+nodebb_container_labels_traefik_docker_network: "{{ nodebb_container_network }}"
+nodebb_container_labels_traefik_hostname: "{{ nodebb_hostname }}"
+# The path prefix must either be `/` or not end with a slash (e.g. `/nodebb`).
+nodebb_container_labels_traefik_path_prefix: "{{ nodebb_path_prefix }}"
+nodebb_container_labels_traefik_rule: "Host(`{{ nodebb_container_labels_traefik_hostname }}`){% if nodebb_container_labels_traefik_path_prefix != '/' %} && PathPrefix(`{{ nodebb_container_labels_traefik_path_prefix }}`){% endif %}"
+nodebb_container_labels_traefik_priority: 0
+nodebb_container_labels_traefik_entrypoints: web-secure
+nodebb_container_labels_traefik_tls: "{{ nodebb_container_labels_traefik_entrypoints != 'web' }}"
+nodebb_container_labels_traefik_tls_certResolver: default  # noqa var-naming
+
+# Controls which additional headers to attach to all HTTP requests.
+# To add your own custom request headers, use `nodebb_container_labels_traefik_additional_request_headers_custom`
+nodebb_container_labels_traefik_additional_request_headers: "{{ nodebb_container_labels_traefik_additional_request_headers_auto | combine(nodebb_container_labels_traefik_additional_request_headers_custom) }}"
+nodebb_container_labels_traefik_additional_request_headers_auto: {}
+nodebb_container_labels_traefik_additional_request_headers_custom: {}
+
+# Controls which additional headers to attach to all HTTP responses.
+# To add your own custom response headers, use `nodebb_container_labels_traefik_additional_response_headers_custom`
+nodebb_container_labels_traefik_additional_response_headers: "{{ nodebb_container_labels_traefik_additional_response_headers_auto | combine(nodebb_container_labels_traefik_additional_response_headers_custom) }}"
+nodebb_container_labels_traefik_additional_response_headers_auto: |
+  {{
+    {}
+    | combine ({'X-XSS-Protection': nodebb_http_header_xss_protection} if nodebb_http_header_xss_protection else {})
+    | combine ({'X-Content-Type-Options': nodebb_http_header_content_type_options} if nodebb_http_header_content_type_options else {})
+    | combine ({'Content-Security-Policy': nodebb_http_header_content_security_policy} if nodebb_http_header_content_security_policy else {})
+    | combine ({'Permissions-Policy': nodebb_http_header_permissions_policy} if nodebb_http_header_permissions_policy else {})
+    | combine ({'Strict-Transport-Security': nodebb_http_header_strict_transport_security} if nodebb_http_header_strict_transport_security and nodebb_container_labels_traefik_tls else {})
+  }}
+nodebb_container_labels_traefik_additional_response_headers_custom: {}
+
+# nodebb_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
+# See `../templates/labels.j2` for details.
 #
 # Example:
-# searxng_container_additional_volumes:
-#   - type: bind
-#     src: /path/on/the/host
-#     dst: /data
-#   - type: bind
-#     src: /another-path/on/the/host
-#     dst: /read-only
-#     options: readonly
-searxng_container_additional_volumes: []
+# nodebb_container_labels_additional_labels: |
+#   my.label=1
+#   another.label="here"
+nodebb_container_labels_additional_labels: ""
 
-# A list of extra arguments to pass to the container
-searxng_container_extra_arguments: []
-
-# Additional environment variables.
-searxng_environment_variables_additional_variables: ''
+# A list of extra arguments to pass to the container (`docker run` command)
+nodebb_container_extra_arguments: []
 
 # Specifies the value of the `X-XSS-Protection` header
 # Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
@@ -196,27 +132,23 @@ searxng_environment_variables_additional_variables: ''
 # Learn more about it is here:
 # - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
 # - https://portswigger.net/web-security/cross-site-scripting/reflected
-searxng_http_header_xss_protection: "1; mode=block"
-
-# Specifies the value of the `X-Frame-Options` header which controls whether framing can happen.
-# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
-searxng_http_header_frame_options: SAMEORIGIN
+nodebb_http_header_xss_protection: "1; mode=block"
 
 # Specifies the value of the `X-Content-Type-Options` header.
 # See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
-searxng_http_header_content_type_options: nosniff
+nodebb_http_header_content_type_options: nosniff
 
 # Specifies the value of the `Content-Security-Policy` header.
 # See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
-searxng_http_header_content_security_policy: frame-ancestors 'self'
+nodebb_http_header_content_security_policy: frame-ancestors 'self'
 
-# Specifies the value of the `Permission-Policy` header.
-# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permission-Policy
-searxng_http_header_content_permission_policy: "{{ 'interest-cohort=()' if searxng_floc_optout_enabled else '' }}"
+# Specifies the value of the `Permissions-Policy` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
+nodebb_http_header_permissions_policy: "{{ 'interest-cohort=()' if nodebb_floc_optout_enabled else '' }}"
 
 # Specifies the value of the `Strict-Transport-Security` header.
 # See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
-searxng_http_header_strict_transport_security: "max-age=31536000; includeSubDomains{{ '; preload' if searxng_hsts_preload_enabled else '' }}"
+nodebb_http_header_strict_transport_security: "max-age=31536000; includeSubDomains{{ '; preload' if nodebb_hsts_preload_enabled else '' }}"
 
 # Controls whether to send a "Permissions-Policy interest-cohort=();" header along with all responses
 #
@@ -226,8 +158,8 @@ searxng_http_header_strict_transport_security: "max-age=31536000; includeSubDoma
 # - https://amifloced.org/
 #
 # Of course, a better solution is to just stop using browsers (like Chrome), which participate in such tracking practices.
-# See: `searxng_content_permission_policy`
-searxng_floc_optout_enabled: true
+# See: `nodebb_http_header_permissions_policy`
+nodebb_floc_optout_enabled: true
 
 # Controls if HSTS preloading is enabled
 #
@@ -238,11 +170,30 @@ searxng_floc_optout_enabled: true
 # - https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security
 # - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
 # - https://hstspreload.org/#opt-in
-# See: `searxng_http_header_strict_transport_security`
-searxng_hsts_preload_enabled: false
+# See: `nodebb_http_header_strict_transport_security`
+nodebb_hsts_preload_enabled: false
 
-# List of systemd services that searxng.service depends on
-searxng_systemd_required_services_list: "{{ searxng_systemd_required_services_list_default + searxng_systemd_required_services_list_auto + searxng_systemd_required_services_list_custom }}"
-searxng_systemd_required_services_list_default: ['docker.service']
-searxng_systemd_required_services_list_auto: []
-searxng_systemd_required_services_list_custom: []
+# List of systemd services that the NodeBB systemd service depends on
+nodebb_systemd_required_services_list: "{{ nodebb_systemd_required_services_list_default + nodebb_systemd_required_services_list_auto + nodebb_systemd_required_services_list_custom }}"
+nodebb_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
+nodebb_systemd_required_services_list_auto: []
+nodebb_systemd_required_services_list_custom: []
+
+# List of systemd services that the NodeBB systemd service wants
+nodebb_systemd_wanted_services_list: "{{ nodebb_systemd_wanted_services_list_default + nodebb_systemd_wanted_services_list_auto + nodebb_systemd_wanted_services_list_custom }}"
+nodebb_systemd_wanted_services_list_default: []
+nodebb_systemd_wanted_services_list_auto: []
+nodebb_systemd_wanted_services_list_custom: []
+
+nodebb_database_mongodb_hostname: ""
+nodebb_database_mongodb_port: 27017
+nodebb_database_mongodb_username: nodebb
+nodebb_database_mongodb_password: ""
+nodebb_database_mongodb_name: nodebb
+
+nodebb_redis_hostname: ""
+nodebb_redis_port: 6379
+nodebb_redis_database: 0
+
+# Additional environment variables.
+nodebb_environment_variables_additional_variables: ""

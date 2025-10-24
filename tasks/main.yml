@@ -1,23 +1,27 @@
+# SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 ---
-
-- block:
-    - when: searxng_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
-
-    - when: searxng_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/prepare_basic_auth.yml"
-
-    - when: searxng_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
+- name: Perform NodeBB installation tasks
+  when: nodebb_enabled | bool
   tags:
     - setup-all
-    - setup-searxng
+    - setup-nodebb
     - install-all
-    - install-searxng
+    - install-nodebb
+  block:
+    - name: Validate NodeBB configuration
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
+    - name: Install NodeBB
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
-- block:
-    - when: not searxng_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
+- name: Perform NodeBB uninstallation tasks
+  when: not nodebb_enabled | bool
   tags:
     - setup-all
-    - setup-searxng
+    - setup-nodebb
+  block:
+    - name: Uninstall NodeBB
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"

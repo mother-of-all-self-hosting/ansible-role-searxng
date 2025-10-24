@@ -13,10 +13,8 @@
     group: "{{ searxng_gid }}"
   with_items:
     - "{{ searxng_base_path }}"
-    - "{{ searxng_data_path }}" # the path contains paths below
-    - "{{ searxng_build_path }}"
-    - "{{ searxng_config_path }}"
-    - "{{ searxng_uploads_path }}"
+    - "{{ searxng_cache_path }}"
+    - "{{ searxng_data_path }}"
 
 - name: Ensure SearXNG support files installed
   ansible.builtin.template:

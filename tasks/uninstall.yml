@@ -37,6 +37,13 @@
         path: "{{ searxng_container_image_self_build_src_files_path }}"
         state: absent
 
+    - name: Ensure SearXNG local cache data path does not exist if empty
+      ansible.builtin.command:
+        cmd: "rmdir {{ searxng_cache_path }}"
+      register: searxng_cache_path_deletion_result
+      changed_when: searxng_cache_path_deletion_result.rc == 0
+      failed_when: false
+
     - name: Ensure SearXNG local build data path does not exist if empty
       ansible.builtin.command:
         cmd: "rmdir {{ searxng_data_path }}"
@@ -65,6 +72,24 @@
           {{ searxng_container_network }}
       register: network_deletion_result
       changed_when: searxng_container_network in network_deletion_result.stdout
+
+- name: Check existence of SearXNG local cache path
+  ansible.builtin.stat:
+    path: "{{ searxng_cache_path }}"
+  register: searxng_cache_path_stat
+
+# We just want to notify the user. Deleting upload files is too destructive.
+- name: Notify if SearXNG local upload files remains
+  when: searxng_cache_path_stat.stat.exists | bool
+  ansible.builtin.set_fact:
+    devture_playbook_runtime_messages_list: |
+      {{
+        devture_playbook_runtime_messages_list | default([])
+        +
+        [
+          "Note: As the local SearXNG instance has been removed, some old cache remains in `" + searxng_cache_path + "`. Feel free to delete it."
+        ]
+      }}
 
 - name: Check existence of SearXNG local data path
   ansible.builtin.stat:

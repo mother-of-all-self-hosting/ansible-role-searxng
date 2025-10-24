@@ -14,12 +14,8 @@ searxng_enabled: true
 
 searxng_identifier: searxng
 searxng_base_path: "/{{ searxng_identifier }}"
+searxng_cache_path: "{{ searxng_base_path }}/cache"
 searxng_data_path: "{{ searxng_base_path }}/data"
-
-# Managed in `searxng_data_path`
-searxng_build_path: "{{ searxng_data_path }}/build"
-searxng_config_path: "{{ searxng_data_path }}/config"
-searxng_uploads_path: "{{ searxng_data_path }}/uploads"
 
 # The service has neither releases nor tags; its image is created for each commit
 searxng_version: latest

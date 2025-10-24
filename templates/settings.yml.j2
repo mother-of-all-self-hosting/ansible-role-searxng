@@ -1,16 +1,22 @@
 {#
 SPDX-FileCopyrightText: 2022-2025 SearXNG project contributors
+SPDX-FileCopyrightText: 2025 Suguru Hirahara
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
 
 ---
-# see https://docs.searxng.org/admin/settings/settings.html#settings-use-default-settings
-use_default_settings: true
+use_default_settings: {{ searxng_config_use_default_settings | to_yaml }}
+general:
+  instance_name: {{ searxng_config_searxng_instance_name | to_yaml }}
 server:
-  # base_url is defined in the SEARXNG_BASE_URL environment variable, see .env and docker-compose.yml
-  secret_key: "ultrasecretkey"  # change this!
-  limiter: false  # enable this when running the instance for a public usage on the internet
-  image_proxy: true
-redis:
-  url: redis://redis:6379/0
+  secret_key: {{ searxng_config_server_secret_key | to_yaml }}
+  limiter: {{ searxng_config_server_limiter | to_yaml }}
+  image_proxy: {{ searxng_config_server_image_proxy | to_yaml }}
+  public_instance: {{ searxng_config_public_instance | to_yaml }}
+{% if searxng_config_server_limiter %}
+valkey:
+  url: valkey://{{ searxng_redis_hostname }}:{{ searxng_redis_port }}/{{ searxng_redis_database }}
+{% endif %}
+
+{{ searxng_config_additional_configurations }}

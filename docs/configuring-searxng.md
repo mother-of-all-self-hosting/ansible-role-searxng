@@ -69,6 +69,14 @@ After adjusting the hostname, make sure to adjust your DNS records to point the 
 
 **Note**: hosting the SearXNG under a subpath (by configuring the `searxng_path_prefix` variable) does not seem to be possible due to SearXNG's technical limitations.
 
+### Set a random string for secret key
+
+You also need to set a random string used for the secret key. To do so, add the following configuration to your `vars.yml` file. The value can be generated with `pwgen -s 64 1` or in another way.
+
+```yaml
+searxng_config_server_secret_key: YOUR_SECRET_KEY_HERE
+```
+
 ### Configure a MongoDB database server (optional)
 
 To have SearXNG connect to your MongoDB server, add the following configuration to your `vars.yml` file.
@@ -83,11 +91,17 @@ searxng_database_mongodb_name: YOUR_MONGODB_SERVER_DATABASE_NAME_HERE
 
 Make sure to replace values for variables with yours.
 
-### Configure a Redis server (optional)
+### Enabling rate limiter with a Valkey server (optional)
 
-To enable Redis for SearXNG, add the following configuration to your `vars.yml` file, so that the SearXNG instance will connect to the server:
+Also, you can optionally enable the [rate limiter](https://docs.searxng.org/admin/searx.limiter.html) with a [Valkey](https://redis.io/) server.
+
+If you are looking for an Ansible role for Valkey, you can check out [ansible-role-valkey](https://github.com/mother-of-all-self-hosting/ansible-role-valkey) maintained by the [Mother-of-All-Self-Hosting (MASH)](https://github.com/mother-of-all-self-hosting) team.
+
+To enable the rate limiter with Valkey, add the following configuration to your `vars.yml` file:
 
 ```yaml
+searxng_config_server_limiter: true
+
 searxng_redis_hostname: YOUR_REDIS_SERVER_HOSTNAME_HERE
 searxng_redis_port: 6379
 searxng_redis_database: 0

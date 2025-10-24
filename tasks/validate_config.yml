@@ -17,6 +17,7 @@
     - searxng_hostname
     - searxng_path_prefix
     - searxng_container_network
+    - searxng_config_server_secret_key
 
 - name: Run if Traefik is enabled
   when: searxng_container_labels_traefik_enabled | bool

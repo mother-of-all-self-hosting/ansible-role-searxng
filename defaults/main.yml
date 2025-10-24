@@ -181,12 +181,6 @@ searxng_systemd_wanted_services_list_default: []
 searxng_systemd_wanted_services_list_auto: []
 searxng_systemd_wanted_services_list_custom: []
 
-searxng_database_mongodb_hostname: ""
-searxng_database_mongodb_port: 27017
-searxng_database_mongodb_username: searxng
-searxng_database_mongodb_password: ""
-searxng_database_mongodb_name: searxng
-
 searxng_redis_hostname: ""
 searxng_redis_port: 6379
 searxng_redis_database: 0

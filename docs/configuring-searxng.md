@@ -26,15 +26,6 @@ SearXNG is a Node.js based free forum software.
 
 See the project's [documentation](https://docs.searxng.org/) to learn what SearXNG does and why it might be useful to you.
 
-## Prerequisites
-
-To run a SearXNG instance it is necessary to prepare a database. You can use [MongoDB](https://mongodb.com) or [Redis](https://redis.io/).
-
-If you are looking for Ansible roles for them, you can check out [ansible-role-mongodb](https://github.com/mother-of-all-self-hosting/ansible-role-mongodb) and [ansible-role-redis](https://github.com/mother-of-all-self-hosting/ansible-role-redis), both of which are maintained by the [Mother-of-All-Self-Hosting (MASH)](https://github.com/mother-of-all-self-hosting) team. The roles for [KeyDB](https://keydb.dev/) ([ansible-role-keydb](https://github.com/mother-of-all-self-hosting/ansible-role-keydb)) and [Valkey](https://valkey.io/) ([ansible-role-valkey](https://github.com/mother-of-all-self-hosting/ansible-role-valkey)) are available as well.
-
->[!NOTE]
-> This role does not support Postgres, as installing with it has been deprecated.
-
 ## Adjusting the playbook configuration
 
 To enable the SearXNG with this role, add the following configuration to your `vars.yml` file.
@@ -76,20 +67,6 @@ You also need to set a random string used for the secret key. To do so, add the 
 ```yaml
 searxng_config_server_secret_key: YOUR_SECRET_KEY_HERE
 ```
-
-### Configure a MongoDB database server (optional)
-
-To have SearXNG connect to your MongoDB server, add the following configuration to your `vars.yml` file.
-
-```yaml
-searxng_database_mongodb_hostname: YOUR_MONGODB_SERVER_HOSTNAME_HERE
-searxng_database_mongodb_port: 27017
-searxng_database_mongodb_username: YOUR_MONGODB_SERVER_USERNAME_HERE
-searxng_database_mongodb_password: YOUR_MONGODB_SERVER_PASSWORD_HERE
-searxng_database_mongodb_name: YOUR_MONGODB_SERVER_DATABASE_NAME_HERE
-```
-
-Make sure to replace values for variables with yours.
 
 ### Enabling rate limiter with a Valkey server (optional)
 
@@ -134,10 +111,6 @@ After running the command for installation, SearXNG becomes available at the spe
 To get started, open the URL with a web browser, and follow the set up wizard. Some of the details for the database are automatically specified.
 
 On the wizard UI, **the scheme (`HTTPS` or `HTTP`) for the public facing URL is sometimes not detected properly**. Make sure that the correct one is specified, and set it manually if not. The service works even if the correct one is not set, but certain plugins such as [`searxng-plugin-2factor`](https://github.com/julianlam/searxng-plugin-2factor) will not work as expected, as WebAuthn requires the canonical URL to being on the secure contexts (HTTPS).
-
-### Configuring a mailer
-
-The official Docker image which this role uses to configure a SearXNG instance assumes that SendMail would be available as a mailer, which in fact is not. Therefore, sending emails with the default configuration fails with the error `error:sendmail-not-found`. The project [recommends](https://docs.searxng.org/configuring/plugins/emailers/) to use third party mailers with plugins.
 
 ## Troubleshooting
 

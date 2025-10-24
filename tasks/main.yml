@@ -4,24 +4,24 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Perform NodeBB installation tasks
-  when: nodebb_enabled | bool
+- name: Perform SearXNG installation tasks
+  when: searxng_enabled | bool
   tags:
     - setup-all
-    - setup-nodebb
+    - setup-searxng
     - install-all
-    - install-nodebb
+    - install-searxng
   block:
-    - name: Validate NodeBB configuration
+    - name: Validate SearXNG configuration
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
-    - name: Install NodeBB
+    - name: Install SearXNG
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
-- name: Perform NodeBB uninstallation tasks
-  when: not nodebb_enabled | bool
+- name: Perform SearXNG uninstallation tasks
+  when: not searxng_enabled | bool
   tags:
     - setup-all
-    - setup-nodebb
+    - setup-searxng
   block:
-    - name: Uninstall NodeBB
+    - name: Uninstall SearXNG
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"

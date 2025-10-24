@@ -2,9 +2,9 @@
 galaxy_info:
   author: Suguru Hirahara
   company: progressiv
-  role_name: nodebb
+  role_name: searxng
   namespace: progressiv
-  description: NodeBB
+  description: SearXNG
   platforms:
     - name: Debian
       versions:

@@ -4,82 +4,82 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Check existence of NodeBB systemd service
+- name: Check existence of SearXNG systemd service
   ansible.builtin.stat:
-    path: "{{ devture_systemd_docker_base_systemd_path }}/{{ nodebb_identifier }}.service"
-  register: nodebb_service_stat
+    path: "{{ devture_systemd_docker_base_systemd_path }}/{{ searxng_identifier }}.service"
+  register: searxng_service_stat
 
-- name: Uninstall NodeBB systemd services and files
-  when: nodebb_service_stat.stat.exists | bool
+- name: Uninstall SearXNG systemd services and files
+  when: searxng_service_stat.stat.exists | bool
   block:
-    - name: Ensure NodeBB systemd service is stopped
+    - name: Ensure SearXNG systemd service is stopped
       ansible.builtin.service:
-        name: "{{ nodebb_identifier }}"
+        name: "{{ searxng_identifier }}"
         state: stopped
         enabled: false
         daemon_reload: true
 
-    - name: Ensure NodeBB systemd service does not exist
+    - name: Ensure SearXNG systemd service does not exist
       ansible.builtin.file:
-        path: "{{ devture_systemd_docker_base_systemd_path }}/{{ nodebb_identifier }}.service"
+        path: "{{ devture_systemd_docker_base_systemd_path }}/{{ searxng_identifier }}.service"
         state: absent
 
-    - name: Ensure NodeBB support files do not exist
+    - name: Ensure SearXNG support files do not exist
       ansible.builtin.file:
-        path: "{{ nodebb_base_path }}/{{ item }}"
+        path: "{{ searxng_base_path }}/{{ item }}"
         state: absent
       with_items:
         - env
         - labels
 
-    - name: Ensure NodeBB image source files path does not exist
+    - name: Ensure SearXNG image source files path does not exist
       ansible.builtin.file:
-        path: "{{ nodebb_container_image_self_build_src_files_path }}"
+        path: "{{ searxng_container_image_self_build_src_files_path }}"
         state: absent
 
-    - name: Ensure NodeBB local build data path does not exist if empty
+    - name: Ensure SearXNG local build data path does not exist if empty
       ansible.builtin.command:
-        cmd: "rmdir {{ nodebb_data_path }}"
-      register: nodebb_data_path_deletion_result
-      changed_when: nodebb_data_path_deletion_result.rc == 0
+        cmd: "rmdir {{ searxng_data_path }}"
+      register: searxng_data_path_deletion_result
+      changed_when: searxng_data_path_deletion_result.rc == 0
       failed_when: false
 
-    - name: Ensure NodeBB base path does not exist if empty
+    - name: Ensure SearXNG base path does not exist if empty
       ansible.builtin.command:
-        cmd: "rmdir {{ nodebb_base_path }}"
-      register: nodebb_base_path_deletion_result
-      changed_when: nodebb_base_path_deletion_result.rc == 0
+        cmd: "rmdir {{ searxng_base_path }}"
+      register: searxng_base_path_deletion_result
+      changed_when: searxng_base_path_deletion_result.rc == 0
       failed_when: false
 
-    - name: Ensure NodeBB container network does not exist via community.docker.docker_network
+    - name: Ensure SearXNG container network does not exist via community.docker.docker_network
       when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
       community.docker.docker_network:
-        name: "{{ nodebb_container_network }}"
+        name: "{{ searxng_container_network }}"
         state: absent
 
-    - name: Ensure NodeBB container network does not exist via ansible.builtin.command
+    - name: Ensure SearXNG container network does not exist via ansible.builtin.command
       when: devture_systemd_docker_base_container_network_creation_method == 'command'
       ansible.builtin.command:
         cmd: >-
           {{ devture_systemd_docker_base_host_command_docker }} network rm
-          {{ nodebb_container_network }}
+          {{ searxng_container_network }}
       register: network_deletion_result
-      changed_when: nodebb_container_network in network_deletion_result.stdout
+      changed_when: searxng_container_network in network_deletion_result.stdout
 
-- name: Check existence of NodeBB local data path
+- name: Check existence of SearXNG local data path
   ansible.builtin.stat:
-    path: "{{ nodebb_data_path }}"
-  register: nodebb_data_path_stat
+    path: "{{ searxng_data_path }}"
+  register: searxng_data_path_stat
 
 # We just want to notify the user. Deleting upload files is too destructive.
-- name: Notify if NodeBB local upload files remains
-  when: nodebb_data_path_stat.stat.exists | bool
+- name: Notify if SearXNG local upload files remains
+  when: searxng_data_path_stat.stat.exists | bool
   ansible.builtin.set_fact:
     devture_playbook_runtime_messages_list: |
       {{
         devture_playbook_runtime_messages_list | default([])
         +
         [
-          "Note: As the local NodeBB instance has been removed, some old data remains in `" + nodebb_data_path + "`. Feel free to delete it."
+          "Note: As the local SearXNG instance has been removed, some old data remains in `" + searxng_data_path + "`. Feel free to delete it."
         ]
       }}

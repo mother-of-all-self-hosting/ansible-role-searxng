@@ -1,23 +1,23 @@
 {
     "defaults": {
         "mongo": {
-            "host": "{{ nodebb_database_mongodb_hostname }}",
-            "port": {{ nodebb_database_mongodb_port }},
-            "database": "{{ nodebb_database_mongodb_name }}",
-            "username": "{{ nodebb_database_mongodb_username }}",
-            "password": "{{ nodebb_database_mongodb_password }}"
+            "host": "{{ searxng_database_mongodb_hostname }}",
+            "port": {{ searxng_database_mongodb_port }},
+            "database": "{{ searxng_database_mongodb_name }}",
+            "username": "{{ searxng_database_mongodb_username }}",
+            "password": "{{ searxng_database_mongodb_password }}"
         },
         "redis": {
-            "host": "{{ nodebb_redis_hostname }}",
-            "port": {{ nodebb_redis_port }},
-            "database": {{ nodebb_redis_database }}
+            "host": "{{ searxng_redis_hostname }}",
+            "port": {{ searxng_redis_port }},
+            "database": {{ searxng_redis_database }}
         },
         "postgres": {
             "host": "postgres",
             "port": 5432,
-            "database": "nodebb",
-            "username": "nodebb",
-            "password": "nodebb"
+            "database": "searxng",
+            "username": "searxng",
+            "password": "searxng"
         }
     }
 }

@@ -5,9 +5,9 @@ SPDX-FileCopyrightText: 2025 Suguru Hirahara
 SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 
-# NodeBB Ansible role
+# SearXNG Ansible role
 
-This is an [Ansible](https://www.ansible.com/) role which installs an [NodeBB](https://github.com/NodeBB/NodeBB/) server to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
+This is an [Ansible](https://www.ansible.com/) role which installs an [SearXNG](https://github.com/SearXNG/SearXNG/) server to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
 This role *implicitly* depends on:
 
@@ -16,7 +16,7 @@ This role *implicitly* depends on:
 
 Check [defaults/main.yml](defaults/main.yml) for the full list of supported options.
 
-💡 See this [document](docs/configuring-nodebb.md) for details about setting up the service with this role.
+💡 See this [document](docs/configuring-searxng.md) for details about setting up the service with this role.
 
 ## Development
 

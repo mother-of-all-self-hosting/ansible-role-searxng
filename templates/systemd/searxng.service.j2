@@ -23,14 +23,13 @@ Environment="HOME={{ devture_systemd_docker_base_systemd_unit_home_path }}"
 ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} stop -t {{ devture_systemd_docker_base_container_stop_grace_time_seconds }} {{ searxng_identifier }} 2>/dev/null || true'
 ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ searxng_identifier }} 2>/dev/null || true'
 
-{#
-  --cap-drop=ALL and --read-only prevent the service from working properly
-#}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --rm \
       --name={{ searxng_identifier }} \
       --log-driver=none \
       --user={{ searxng_uid }}:{{ searxng_gid }} \
+      --cap-drop=ALL \
+      --read-only \
       --network={{ searxng_container_network }} \
       {% if searxng_container_http_host_bind_port %}
       -p {{ searxng_container_http_host_bind_port }}:{{ searxng_container_http_port }} \
@@ -42,6 +41,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       {% for volume in searxng_container_additional_volumes %}
       --mount type={{ volume.type | default('bind' if '/' in volume.src else 'volume') }},src={{ volume.src }},dst={{ volume.dst }}{{ (',' + volume.options) if volume.options else '' }} \
       {% endfor %}
+      --tmpfs=/tmp:rw,noexec,nosuid,size=128m \
       {% for arg in searxng_container_extra_arguments %}
       {{ arg }} \
       {% endfor %}

@@ -58,8 +58,6 @@ searxng_hostname: "example.com"
 
 After adjusting the hostname, make sure to adjust your DNS records to point the domain to your server.
 
-**Note**: hosting the SearXNG under a subpath (by configuring the `searxng_path_prefix` variable) does not seem to be possible due to SearXNG's technical limitations.
-
 ### Set a random string for secret key
 
 You also need to set a random string used for the secret key. To do so, add the following configuration to your `vars.yml` file. The value can be generated with `pwgen -s 64 1` or in another way.

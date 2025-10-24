@@ -30,9 +30,6 @@ searxng_hostname: ""
 
 # The path at which SearXNG is exposed.
 # This value must either be `/` or not end with a slash (e.g. `/searxng`).
-#
-# Hosting SearXNG under a subpath does not seem to be possible due to SearXNG's
-# technical limitations.
 searxng_path_prefix: /
 
 searxng_container_image: "{{ searxng_container_image_registry_prefix }}searxng/searxng:{{ searxng_container_image_tag }}"

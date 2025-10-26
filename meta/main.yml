@@ -1,9 +1,9 @@
 ---
 galaxy_info:
-  author: Suguru Hirahara
-  company: progressiv
+  author: Sergio Durigan Junior
+  company: mash
   role_name: searxng
-  namespace: progressiv
+  namespace: mash
   description: SearXNG
   platforms:
     - name: Debian

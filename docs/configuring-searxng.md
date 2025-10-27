@@ -28,7 +28,7 @@ See the project's [documentation](https://docs.searxng.org/) to learn what SearX
 
 ## Adjusting the playbook configuration
 
-To enable the SearXNG with this role, add the following configuration to your `vars.yml` file.
+To enable SearXNG with this role, add the following configuration to your `vars.yml` file.
 
 **Note**: the path should be something like `inventory/host_vars/mash.example.com/vars.yml` if you use the [MASH Ansible playbook](https://github.com/mother-of-all-self-hosting/mash-playbook).
 

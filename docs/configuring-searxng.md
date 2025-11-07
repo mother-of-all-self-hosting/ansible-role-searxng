@@ -50,7 +50,7 @@ searxng_enabled: true
 
 ### Set the hostname
 
-To enable the SearXNG you need to set the hostname as well. To do so, add the following configuration to your `vars.yml` file. Make sure to replace `example.com` with your own value.
+To enable the SearXNG instance you need to set the hostname as well. To do so, add the following configuration to your `vars.yml` file. Make sure to replace `example.com` with your own value.
 
 ```yaml
 searxng_hostname: "example.com"

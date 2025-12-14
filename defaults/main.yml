@@ -1,8 +1,9 @@
-# SPDX-FileCopyrightText: 2023, 2024 Nikita Chernyi
-# SPDX-FileCopyrightText: 2023-2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023 - 2024 Nikita Chernyi
+# SPDX-FileCopyrightText: 2023 - 2025 MASH project contributors
+# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023 Niels Bouma
 # SPDX-FileCopyrightText: 2024 Julian-Samuel Gebühr
 # SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
-# SPDX-FileCopyrightText: 2025 MASH project contributors
 # SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -202,6 +203,28 @@ searxng_config_additional_configurations: ""
 
 # Additional configurations for rate limiter on limiter.toml
 searxng_limiter_additional_configurations: ""
+
+# Default SearXNG configuration template which covers the generic use case.
+# You can customize it by controlling the various variables inside it.
+#
+# For a more advanced customization, you can extend the default (see `searxng_configuration_yaml`)
+# or completely replace this variable with your own template.
+searxng_configuration_yaml: "{{ lookup('template', 'templates/settings.yml.j2') }}"
+
+searxng_configuration_extension_yaml: |
+  # Your custom YAML configuration for SearXNG goes here.
+  # This configuration extends the default starting configuration (`searxng_configuration_yaml`).
+  #
+  # You can override individual variables from the default configuration, or introduce new ones.
+  #
+  # If you need something more special, you can take full control by
+  # completely redefining `searxng_configuration_yaml`.
+
+searxng_configuration_extension: "{{ searxng_configuration_extension_yaml | from_yaml if searxng_configuration_extension_yaml | from_yaml is mapping else {} }}"
+
+# Holds the final SearXNG configuration (a combination of the default and its extension).
+# You most likely don't need to touch this variable. Instead, see `searxng_configuration_yaml`.
+searxng_configuration: "{{ searxng_configuration_yaml | from_yaml | combine(searxng_configuration_extension, recursive=True) }}"
 
 searxng_environment_variables_searxng_base_url: "{{ searxng_scheme }}://{{ searxng_hostname }}{{ searxng_path_prefix }}"
 

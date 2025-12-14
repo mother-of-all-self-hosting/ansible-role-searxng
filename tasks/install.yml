@@ -28,7 +28,15 @@
     - env
     - labels
 
-- name: Ensure SearXNG configuration files installed
+- name: Ensure settings.yml for SearXNG installed
+  ansible.builtin.copy:
+    content: "{{ searxng_configuration | to_nice_yaml(indent=2, width=999999) }}"
+    dest: "{{ searxng_data_path }}/settings.yml"
+    owner: "{{ searxng_uid }}"
+    group: "{{ searxng_gid }}"
+    mode: "0640"
+
+- name: Ensure limiter.toml for SearXNG installed
   ansible.builtin.template:
     src: "{{ role_path }}/templates/{{ item }}.j2"
     dest: "{{ searxng_data_path }}/{{ item }}"
@@ -36,7 +44,6 @@
     owner: "{{ searxng_uid }}"
     group: "{{ searxng_gid }}"
   with_items:
-    - settings.yml
     - limiter.toml
 
 - name: Run if self-building of SearXNG container image is not enabled

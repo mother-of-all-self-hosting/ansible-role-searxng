@@ -226,6 +226,9 @@ searxng_configuration_extension: "{{ searxng_configuration_extension_yaml | from
 # You most likely don't need to touch this variable. Instead, see `searxng_configuration_yaml`.
 searxng_configuration: "{{ searxng_configuration_yaml | from_yaml | combine(searxng_configuration_extension, recursive=True) }}"
 
+# Specify the timezone
+searxng_environment_variables_tz: UTC
+
 searxng_environment_variables_searxng_base_url: "{{ searxng_scheme }}://{{ searxng_hostname }}{{ searxng_path_prefix }}"
 
 # Additional environment variables.

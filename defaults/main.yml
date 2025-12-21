@@ -29,7 +29,7 @@ searxng_scheme: https
 # The hostname at which SearXNG is served.
 searxng_hostname: ""
 
-# The path at which SearXNG is exposed.
+# The path at which SearXNG is served.
 # This value must either be `/` or not end with a slash (e.g. `/searxng`).
 searxng_path_prefix: /
 

@@ -57,4 +57,6 @@ traefik.http.routers.{{ searxng_identifier }}.tls.certResolver={{ searxng_contai
 traefik.http.services.{{ searxng_identifier }}.loadbalancer.server.port={{ searxng_container_http_port }}
 {% endif %}
 
-{{ searxng_container_labels_additional_labels }}
+{% for arg in searxng_container_labels_additional_labels %}
+{{ arg }}
+{% endfor %}

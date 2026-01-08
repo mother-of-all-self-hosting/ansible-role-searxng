@@ -32,9 +32,9 @@
   ansible.builtin.copy:
     content: "{{ searxng_configuration | to_nice_yaml(indent=2, width=999999) }}"
     dest: "{{ searxng_data_path }}/settings.yml"
+    mode: "0640"
     owner: "{{ searxng_uid }}"
     group: "{{ searxng_gid }}"
-    mode: "0640"
 
 - name: Ensure limiter.toml for SearXNG installed
   ansible.builtin.template:

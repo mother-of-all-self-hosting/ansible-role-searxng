@@ -121,6 +121,9 @@ searxng_container_labels_additional_labels: "{{ searxng_container_labels_additio
 searxng_container_labels_additional_labels_auto: []
 searxng_container_labels_additional_labels_custom: []
 
+# Specify the size of the container's tmpfs volume
+searxng_container_tmpfs_tmp_size: 128m
+
 # A list of extra arguments to pass to the container (`docker create` command)
 searxng_container_extra_arguments: "{{ searxng_container_extra_arguments_auto + searxng_container_extra_arguments_custom }}"
 searxng_container_extra_arguments_auto: []

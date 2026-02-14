@@ -64,6 +64,7 @@
       community.docker.docker_network:
         name: "{{ searxng_container_network }}"
         state: absent
+      register: searxng_network_deletion_result
 
     - name: Ensure SearXNG container network does not exist via ansible.builtin.command
       when: devture_systemd_docker_base_container_network_creation_method == 'command'
@@ -71,8 +72,8 @@
         cmd: >-
           {{ devture_systemd_docker_base_host_command_docker }} network rm
           {{ searxng_container_network }}
-      register: network_deletion_result
-      changed_when: searxng_container_network in network_deletion_result.stdout
+      register: searxng_network_deletion_result
+      changed_when: searxng_container_network in searxng_network_deletion_result.stdout
 
 - name: Check existence of SearXNG local cache path
   ansible.builtin.stat:

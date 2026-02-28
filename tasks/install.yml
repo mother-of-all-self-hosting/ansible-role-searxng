@@ -27,6 +27,7 @@
   with_items:
     - env
     - labels
+  register: searxng_support_files_result
 
 - name: Ensure settings.yml for SearXNG installed
   ansible.builtin.copy:
@@ -35,6 +36,7 @@
     mode: "0640"
     owner: "{{ searxng_uid }}"
     group: "{{ searxng_gid }}"
+  register: searxng_config_file_result
 
 - name: Ensure limiter.toml for SearXNG installed
   ansible.builtin.template:
@@ -45,6 +47,7 @@
     group: "{{ searxng_gid }}"
   with_items:
     - limiter.toml
+  register: searxng_limiter_toml_result
 
 - name: Run if self-building of SearXNG container image is not enabled
   when: "not searxng_container_image_self_build | bool"
@@ -56,20 +59,20 @@
         source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
         force_source: "{{ searxng_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
         force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else searxng_container_image_force_pull }}"
-      register: result
+      register: searxng_container_image_pull_result
       retries: "{{ devture_playbook_help_container_retries_count }}"
       delay: "{{ devture_playbook_help_container_retries_delay }}"
-      until: result is not failed
+      until: searxng_container_image_pull_result is not failed
 
     - name: Ensure SearXNG container image is pulled via ansible.builtin.command
       when: devture_systemd_docker_base_container_image_pull_method == 'command'
       ansible.builtin.command:
         cmd: "{{ devture_systemd_docker_base_host_command_docker }} pull {{ searxng_container_image }}"
-      register: result
+      register: searxng_container_image_pull_result
       retries: "{{ devture_playbook_help_container_retries_count }}"
       delay: "{{ devture_playbook_help_container_retries_delay }}"
-      until: result is not failed
-      changed_when: "'Downloaded newer image' in result.stdout"
+      until: searxng_container_image_pull_result is not failed
+      changed_when: "'Downloaded newer image' in searxng_container_image_pull_result.stdout"
 
 - name: Run if self-building of SearXNG container image is enabled
   when: "searxng_container_image_self_build | bool"
@@ -121,3 +124,16 @@
     src: "{{ role_path }}/templates/systemd/searxng.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ searxng_identifier }}.service"
     mode: "0644"
+  register: searxng_systemd_service_result
+
+- name: Determine whether SearXNG needs a restart
+  ansible.builtin.set_fact:
+    searxng_restart_necessary: >-
+      {{
+        searxng_support_files_result.changed | default(false)
+        or searxng_config_file_result.changed | default(false)
+        or searxng_limiter_toml_result.changed | default(false)
+        or searxng_systemd_service_result.changed | default(false)
+        or searxng_container_image_pull_result.changed | default(false)
+        or searxng_container_image_build_result.changed | default(false)
+      }}

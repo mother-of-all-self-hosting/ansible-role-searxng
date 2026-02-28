@@ -245,3 +245,13 @@ searxng_environment_variables_searxng_base_url: "{{ searxng_scheme }}://{{ searx
 
 # Additional environment variables.
 searxng_environment_variables_additional_variables: ""
+
+# searxng_restart_necessary controls whether the SearXNG systemd
+# service will be restarted (when true) or merely started (when false) by the
+# systemd service manager role (when conditional restart is enabled).
+#
+# This value is automatically computed during installation based on whether
+# any configuration files, the systemd service file, or the container image changed.
+# The default of `false` means "no restart needed" — appropriate when the role's
+# installation tasks haven't run (e.g., due to --tags skipping them).
+searxng_restart_necessary: false

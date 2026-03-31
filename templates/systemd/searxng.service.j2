@@ -2,7 +2,7 @@
 SPDX-FileCopyrightText: 2023 Slavi Pantaleev
 SPDX-FileCopyrightText: 2024 Nikita Chernyi
 SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
-SPDX-FileCopyrightText: 2025 Suguru Hirahara
+SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
@@ -38,6 +38,9 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --label-file={{ searxng_base_path }}/labels \
       --mount type=bind,src={{ searxng_cache_path }},dst=/var/cache/searxng \
       --mount type=bind,src={{ searxng_data_path }},dst=/etc/searxng \
+      {% if searxng_redis_socket_enabled and searxng_redis_socket_path_host != '' %}
+      --mount type=bind,src={{ searxng_redis_socket_path_host }},dst={{ searxng_redis_socket_path_container }} \
+      {% endif %}
       {% for volume in searxng_container_additional_volumes %}
       --mount type={{ volume.type | default('bind' if '/' in volume.src else 'volume') }},src={{ volume.src }},dst={{ volume.dst }}{{ (',' + volume.options) if volume.options | default('') else '' }} \
       {% endfor %}

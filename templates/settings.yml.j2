@@ -1,7 +1,7 @@
 {#
 SPDX-FileCopyrightText: 2022-2025 SearXNG project contributors
 SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
-SPDX-FileCopyrightText: 2025 Suguru Hirahara
+SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
@@ -17,9 +17,9 @@ server:
 {% endif %}
   image_proxy: {{ searxng_config_server_image_proxy | to_yaml }}
   public_instance: {{ searxng_config_public_instance | to_yaml }}
-{% if searxng_redis_hostname %}
+{% if searxng_redis_hostname or searxng_redis_socket_path_host %}
 valkey:
-  url: valkey://{{ searxng_redis_hostname }}:{{ searxng_redis_port }}/{{ searxng_redis_database }}
+  url: {{ searxng_environment_variables_redis_url }}
 {% endif %}
 
 {{ searxng_config_additional_configurations }}

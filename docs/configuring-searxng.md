@@ -8,12 +8,13 @@ SPDX-FileCopyrightText: 2020-2024 Slavi Pantaleev
 SPDX-FileCopyrightText: 2022 François Darveau
 SPDX-FileCopyrightText: 2022 Julian Foad
 SPDX-FileCopyrightText: 2022 Warren Bailey
+SPDX-FileCopyrightText: 2023 Alejandro AR
 SPDX-FileCopyrightText: 2023 Antonis Christofides
 SPDX-FileCopyrightText: 2023 Felix Stupp
 SPDX-FileCopyrightText: 2023 Julian-Samuel Gebühr
 SPDX-FileCopyrightText: 2023 Pierre 'McFly' Marty
 SPDX-FileCopyrightText: 2024 Thomas Miceli
-SPDX-FileCopyrightText: 2024, 2025 Suguru Hirahara
+SPDX-FileCopyrightText: 2024-2026 Suguru Hirahara
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 -->
@@ -70,17 +71,25 @@ searxng_config_server_secret_key: YOUR_SECRET_KEY_HERE
 
 Also, you can optionally enable the [rate limiter](https://docs.searxng.org/admin/searx.limiter.html) with a [Valkey](https://valkey.io/) server.
 
-If you are looking for an Ansible role for Valkey, you can check out [ansible-role-valkey](https://github.com/mother-of-all-self-hosting/ansible-role-valkey) maintained by the [Mother-of-All-Self-Hosting (MASH)](https://github.com/mother-of-all-self-hosting) team.
-
-To enable the rate limiter with Valkey, add the following configuration to your `vars.yml` file:
+To enable the rate limiter with Valkey, add the following configuration to your `vars.yml` file, so that the SearXNG instance will connect to the server. Note that the role is by default configured to establish connection with the Valkey server via the Unix socket.
 
 ```yaml
+# Specify the path to the Valkey Unix socket path on the host (bind-mount source)
+searxng_redis_socket_path_host: ""
+```
+
+If TCP connection is preferred, connection via the Unix socket can be disabled by adding the following configuration to your `vars.yml` file:
+
+```yaml
+# Disable the connection to Valkey via a Unix socket
+searxng_redis_socket_enabled: false
+
 searxng_redis_hostname: YOUR_REDIS_SERVER_HOSTNAME_HERE
-searxng_redis_port: 6379
-searxng_redis_database: 0
 ```
 
 Make sure to replace `YOUR_REDIS_SERVER_HOSTNAME_HERE` with your own value.
+
+If you are looking for an Ansible role for Valkey, you can check out [ansible-role-valkey](https://github.com/mother-of-all-self-hosting/ansible-role-valkey) maintained by the [Mother-of-All-Self-Hosting (MASH)](https://github.com/mother-of-all-self-hosting) team.
 
 ### Extending the configuration
 

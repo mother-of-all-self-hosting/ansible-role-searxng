@@ -234,13 +234,6 @@ searxng_redis_port: 6379
 searxng_redis_password: ""
 searxng_redis_database: "0"
 
-searxng_environment_variables_redis_url: |
-  {% if searxng_redis_socket_enabled %}
-  unix://{{ searxng_redis_socket_path_container }}/valkey.sock?db={{ searxng_redis_database }}{{ '&password=' + searxng_redis_password if searxng_redis_password }}
-  {% else %}
-  valkey://:{{ searxng_redis_password }}@{{ searxng_redis_hostname }}:{{ searxng_redis_port }}/{{ searxng_redis_database }}
-  {%- endif -%}
-
 # Control if the connection to Redis is made via a Unix socket
 searxng_redis_socket_enabled: true
 
@@ -249,6 +242,15 @@ searxng_redis_socket_path_host: ""
 
 # Specify the path to the Redis Unix socket path inside the SearXNG container
 searxng_redis_socket_path_container: /run-valkey
+
+searxng_redis_socket_path: /valkey.sock
+
+searxng_environment_variables_redis_url: |
+  {% if searxng_redis_socket_enabled %}
+  unix://{{ searxng_redis_socket_path_container }}{{ searxng_redis_socket_path }}?db={{ searxng_redis_database }}{{ '&password=' + searxng_redis_password if searxng_redis_password }}
+  {% else %}
+  valkey://:{{ searxng_redis_password }}@{{ searxng_redis_hostname }}:{{ searxng_redis_port }}/{{ searxng_redis_database }}
+  {%- endif -%}
 
 ########################################################################
 #                                                                      #

@@ -237,13 +237,12 @@ searxng_redis_database: "0"
 # Control if the connection to Redis is made via a Unix socket
 searxng_redis_socket_enabled: true
 
-# Specify the path to the Redis Unix socket path on the host (bind-mount source)
-searxng_redis_socket_path_host: ""
-
 # Specify the path to the Redis Unix socket path inside the SearXNG container
 searxng_redis_socket_path_container: /run-valkey
-
 searxng_redis_socket_path: /valkey.sock
+
+# Specify the path to the Redis Unix socket path on the host (bind-mount source)
+searxng_redis_socket_path_host: ""
 
 searxng_environment_variables_redis_url: |
   {% if searxng_redis_socket_enabled %}

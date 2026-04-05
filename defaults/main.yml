@@ -244,7 +244,7 @@ searxng_redis_socket_path: /valkey.sock
 # Specify the path to the Redis Unix socket path on the host (bind-mount source)
 searxng_redis_socket_path_host: ""
 
-searxng_environment_variables_redis_url: |
+searxng_environment_variables_redis_url: |-
   {% if searxng_redis_socket_enabled %}
   unix://{{ searxng_redis_socket_path_container }}{{ searxng_redis_socket_path }}?db={{ searxng_redis_database }}{{ '&password=' + searxng_redis_password if searxng_redis_password }}
   {% else %}

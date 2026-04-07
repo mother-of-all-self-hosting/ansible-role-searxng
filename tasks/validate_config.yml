@@ -47,7 +47,7 @@
     - name: Fail if both Redis hostname and socket host path for SearXNG are set
       ansible.builtin.fail:
         msg: >-
-          You may need to set either `searxng_redis_hostname` or `searxng_redis_socket_path_host` to enable Redis integration.
+          You may need to define either `searxng_redis_hostname` or `searxng_redis_socket_path_host` to enable Redis integration.
       when: >-
         searxng_redis_hostname | string | length != 0 and
         searxng_redis_socket_path_host | string | length != 0
@@ -55,7 +55,7 @@
     - name: Fail if Redis hostname for SearXNG is set when Unix socket is enabled
       ansible.builtin.fail:
         msg: >-
-          You need to set `searxng_redis_socket_path_host` and remove `searxng_redis_hostname` to enable Redis integration,
+          You need to define `searxng_redis_socket_path_host` and remove `searxng_redis_hostname` to enable Redis integration,
           when `searxng_redis_socket_enabled` is `true`.
           Check the documentation for details.
           You may remove the Redis service from `searxng_container_additional_networks_custom` if specified.
@@ -66,7 +66,7 @@
     - name: Fail if Redis socket host path for SearXNG is set when Unix socket is not enabled
       ansible.builtin.fail:
         msg: >-
-          You need to set `searxng_redis_hostname` and remove `searxng_redis_socket_path_host` to enable Redis integration,
+          You need to define `searxng_redis_hostname` and remove `searxng_redis_socket_path_host` to enable Redis integration,
           when `searxng_redis_socket_enabled` is `false`.
           Check the documentation for details.
           You may also need to specify the Redis service to `searxng_container_additional_networks_custom` if it does not exist on the same network.

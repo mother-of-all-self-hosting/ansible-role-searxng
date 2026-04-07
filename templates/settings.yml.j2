@@ -17,7 +17,7 @@ server:
 {% endif %}
   image_proxy: {{ searxng_config_server_image_proxy | to_yaml }}
   public_instance: {{ searxng_config_public_instance | to_yaml }}
-{% if searxng_redis_hostname or searxng_redis_socket_path_host %}
+{% if searxng_redis_is_configured %}
 valkey:
   url: {{ searxng_environment_variables_redis_url }}
 {% endif %}

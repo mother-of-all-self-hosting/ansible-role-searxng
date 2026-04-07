@@ -234,6 +234,8 @@ searxng_redis_port: 6379
 searxng_redis_password: ""
 searxng_redis_database: "0"
 
+searxng_redis_is_configured: "{{ searxng_redis_hostname !='' or searxng_redis_socket_path_host != '' }}"
+
 # Control if the connection to Redis is made via a Unix socket
 searxng_redis_socket_enabled: true
 

@@ -39,7 +39,6 @@ searxng_container_image_tag: "{{ searxng_version }}"
 searxng_container_image_registry_prefix: "{{ searxng_container_image_registry_prefix_upstream }}"
 searxng_container_image_registry_prefix_upstream: "{{ searxng_container_image_registry_prefix_upstream_default }}"
 searxng_container_image_registry_prefix_upstream_default: docker.io/
-searxng_container_image_force_pull: "{{ searxng_container_image.endswith(':latest') }}"
 
 searxng_container_image_self_build: false
 searxng_container_image_self_build_name: "searxng/searxng:{{ searxng_container_image_self_build_repo_version }}"

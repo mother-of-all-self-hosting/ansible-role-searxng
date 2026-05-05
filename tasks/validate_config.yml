@@ -27,6 +27,7 @@
     - { "old": "searxng_basic_auth_enabled", "new": "<Removed; please set up a dedicated service for authentication>" }
     - { "old": "searxng_basic_auth_username", "new": "<Removed; please set up a dedicated service for authentication>" }
     - { "old": "searxng_basic_auth_password", "new": "<Removed; please set up a dedicated service for authentication>" }
+    - { "old": "searxng_container_image_force_pull", "new": "<removed> (the new community.docker.docker_image_pull module handles this natively)" }
 
 - name: Fail if required SearXNG settings not defined
   ansible.builtin.fail:

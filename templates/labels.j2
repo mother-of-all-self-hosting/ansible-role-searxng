@@ -15,6 +15,11 @@ traefik.docker.network={{ searxng_container_labels_traefik_docker_network }}
 
 {% set middlewares = [] %}
 
+{% if searxng_container_labels_traefik_middleware_basic_auth_enabled %}
+{% set middlewares = middlewares + [searxng_identifier + '-basic-auth'] %}
+traefik.http.middlewares.{{ searxng_identifier }}-basic-auth.basicauth.users={{ searxng_container_labels_traefik_middleware_basic_auth_users }}
+{% endif %}
+
 {% if searxng_container_labels_traefik_path_prefix != '/' %}
 traefik.http.middlewares.{{ searxng_identifier }}-slashless-redirect.redirectregex.regex=^({{ searxng_container_labels_traefik_path_prefix | quote }})$
 traefik.http.middlewares.{{ searxng_identifier }}-slashless-redirect.redirectregex.replacement=${1}/

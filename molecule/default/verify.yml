@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
+# SPDX-FileCopyrightText: 2026 spatterlight
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Verify SearXNG systemd service
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Wait for SearXNG service to become active (up to 180s)
+      ansible.builtin.systemd:
+        name: searxng.service
+      register: searxng_service
+      until: searxng_service.status.ActiveState == 'active'
+      retries: 36
+      delay: 5
+
+    - name: Assert SearXNG service is active
+      ansible.builtin.assert:
+        that: searxng_service.status.ActiveState == 'active'
+        fail_msg: "searxng.service not active ({{ searxng_service.status.ActiveState }})"
+        success_msg: "searxng.service is active"
+
+    - name: Retrieve SearXNG service log for debugging
+      when: searxng_debug_service_enabled | bool
+      ansible.builtin.command:
+        cmd: journalctl -xeu searxng.service
+      changed_when: false
+
+    - name: Wait for SearXNG HTTP endpoint to respond (up to 10m)
+      ansible.builtin.uri:
+        url: "http://localhost:8080/"
+        method: GET
+        status_code: [200, 301, 302]
+        follow_redirects: none
+      register: searxng_endpoint
+      until: searxng_endpoint.status in [200, 301, 302]
+      retries: 120
+      delay: 5
+
+    - name: Assert SearXNG HTTP endpoint responds
+      ansible.builtin.assert:
+        that: searxng_endpoint.status in [200, 301, 302]
+        fail_msg: "SearXNG did not respond as expected ({{ searxng_endpoint.status | default('no response') }})"
+        success_msg: "SearXNG responded with {{ searxng_endpoint.status }}"
+
+    - name: Show SearXNG systemd service status summary
+      ansible.builtin.debug:
+        msg:
+          - "SearXNG systemd: {{ searxng_service.status.ActiveState }}"
+          - "SearXNG HTTP: {{ searxng_endpoint.status }}"

@@ -124,3 +124,16 @@ After running the command for installation, SearXNG becomes available at the spe
 ### Check the service's logs
 
 You can find the logs in [systemd-journald](https://www.freedesktop.org/software/systemd/man/systemd-journald.service.html) by logging in to the server with SSH and running `journalctl -fu searxng` (or how you/your playbook named the service, e.g. `mash-searxng`).
+
+### SearXNG restarts over and over with a `getpwuid()` error
+
+If the service never settles and the log ends with a traceback like this one:
+
+```text
+File "/usr/local/searxng/searx/valkeydb.py", line 63, in initialize
+KeyError: 'getpwuid(): uid not found: 1000'
+```
+
+then SearXNG could not reach the Valkey server you configured it to use. The message is misleading: SearXNG hit a connection error, and then crashed while trying to name the user it was running as in the error message it wanted to log — which it cannot do inside a container that has no account for that user id.
+
+Check that the Valkey server is running, and that `searxng_redis_socket_path_host` points at the directory which holds its socket (or, if you connect over TCP, that `searxng_redis_hostname` resolves from within SearXNG's container network).

@@ -18,7 +18,22 @@ searxng_base_path: "/{{ searxng_identifier }}"
 searxng_cache_path: "{{ searxng_base_path }}/cache"
 searxng_data_path: "{{ searxng_base_path }}/data"
 
-# The service has neither releases nor tags; its image is created for each commit
+# SearXNG has no versions in the sense the rest of the fleet uses the word.
+# github.com/searxng/searxng publishes no releases and carries no git tags at
+# all; docker.io/searxng/searxng is rebuilt from master several times a week and
+# tagged `<date>-<short commit hash>` (e.g. `2026.8.22-9fea41204`) alongside
+# `latest`. There is no such thing as a SearXNG 1.2.3, and so no patch release
+# of one - every published tag is a snapshot of master.
+#
+# So there is deliberately no `# renovate:` annotation on this variable. Pointing
+# Renovate at those tags would open a pull request for nearly every upstream
+# commit, none of which is a release, and the `patch-automerge` Renovate preset
+# that most of the fleet extends would have nothing to automerge: there are no
+# patch-level bumps for it to tell apart from anything else.
+#
+# It is also why this role's own tags are named `v1.0.0-<release>`: with no
+# upstream version to name a release after, the tags encode its absence and let
+# the release counter carry the information. See `../bin/compute-next-tag.sh`.
 searxng_version: latest
 
 searxng_uid: ""

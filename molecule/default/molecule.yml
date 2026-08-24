@@ -31,6 +31,10 @@ provisioner:
         # Helper variables
         searxng_debug_service_enabled: false
 
+        # The container name the role derives from its identifier.
+        # Role defaults are not in scope in a verify play, so it is spelled out.
+        searxng_molecule_container: searxng
+
         # Variables for SearXNG
         searxng_uid: 1000
         searxng_gid: 1000
@@ -39,6 +43,29 @@ provisioner:
         searxng_container_labels_traefik_enabled: false
         searxng_container_http_host_bind_port: 8080
         searxng_config_server_secret_key: secret
+
+        # Deliberately not the stock "SearXNG". The verification asks the
+        # running instance for its name, and a value that the unconfigured
+        # image reports just as readily would prove nothing about the role.
+        searxng_config_searxng_instance_name: MASH Molecule SearXNG
+
+        # The two different ways this role takes extra SearXNG settings. Each
+        # has a surface in /config which the unconfigured image reports
+        # differently, so the verification can tell that both arrived.
+        #
+        # They also overlap on purpose: `search:` is introduced here and added
+        # to by the extension below. The role merges the two recursively, so
+        # both keys must survive - a non-recursive merge would drop one.
+        searxng_config_additional_configurations: |
+          search:
+            safe_search: 2
+
+        searxng_configuration_extension_yaml: |
+          search:
+            autocomplete: google
+          engines:
+            - name: wikipedia
+              disabled: true
 
         # Variables required for SearXNG to connect to the Valkey data-store (via Unix socket)
         searxng_redis_socket_enabled: true

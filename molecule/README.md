@@ -47,7 +47,11 @@ Currently there is one testing scenario available.
 
 ### `default`
 
-Tests a standard SearXNG installation.
+Tests a standard SearXNG installation, with a Valkey server alongside it that SearXNG reaches over a Unix socket.
+
+SearXNG is a metasearch engine, so it needs the internet to do the thing it exists for. The verification never asks it to: running a search is not something a CI job can depend on. It asks the running instance about itself instead — through `/config` — and asserts the values which only this role's configuration can account for. To keep that honest, it first runs the very same image with no configuration at all (which is enough for this image to serve a working SearXNG) and checks that the stock instance answers all of those questions differently.
+
+Among what it covers: the instance name and the extra settings fed in through both `searxng_config_additional_configurations` and `searxng_configuration_extension_yaml`; the rate limiter reporting itself installed, which SearXNG only does once it has genuinely connected to Valkey; the limiter turning away a request that carries a crawler's `User-Agent`; the container running the tag `searxng_version` names; and neither systemd unit restarting while it is supposedly up.
 
 ## Running
 

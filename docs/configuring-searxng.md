@@ -71,12 +71,16 @@ searxng_config_server_secret_key: YOUR_SECRET_KEY_HERE
 
 Also, you can optionally enable the [rate limiter](https://docs.searxng.org/admin/searx.limiter.html) with a [Valkey](https://valkey.io/) server.
 
-To enable the rate limiter with Valkey, add the following configuration to your `vars.yml` file, so that the SearXNG instance will connect to the server. Note that the role is by default configured to establish connection with the Valkey server via the Unix socket.
+Configuring a Valkey connection is all it takes: the role turns the rate limiter on whenever SearXNG has a Valkey server to talk to, whichever way that server is reached.
+
+To enable the rate limiter with Valkey, add the following configuration to your `vars.yml` file, so that the SearXNG instance will connect to the server. Note that the role is by default configured to establish connection with the Valkey server via the Unix socket. Make sure to replace `YOUR_VALKEY_RUN_DIRECTORY_HERE` with the directory on the host which holds the Valkey socket.
 
 ```yaml
 # Specify the path to the Valkey Unix socket path on the host (bind-mount source)
-searxng_redis_socket_path_host: ""
+searxng_redis_socket_path_host: YOUR_VALKEY_RUN_DIRECTORY_HERE
 ```
+
+Note that the rate limiter identifies clients by the `X-Forwarded-For` (or `X-Real-IP`) header, so it needs a reverse-proxy in front of SearXNG which sets it. Traefik, which this role writes labels for by default, does.
 
 If TCP connection is preferred, connection via the Unix socket can be disabled by adding the following configuration to your `vars.yml` file:
 

@@ -12,7 +12,8 @@ general:
   instance_name: {{ searxng_config_searxng_instance_name | to_yaml }}
 server:
   secret_key: {{ searxng_config_server_secret_key | to_yaml }}
-{% if searxng_redis_hostname %}
+{# The limiter needs a Valkey connection, no matter how that connection is made. #}
+{% if searxng_redis_is_configured %}
   limiter: true
 {% endif %}
   image_proxy: {{ searxng_config_server_image_proxy | to_yaml }}

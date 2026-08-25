@@ -70,7 +70,7 @@
 
     - name: Read the SearXNG container the role created
       ansible.builtin.command:
-        cmd: "docker inspect {{ searxng_molecule_container }}"
+        cmd: "docker container inspect {{ searxng_molecule_container }}"
       register: searxng_container_raw
       changed_when: false
 

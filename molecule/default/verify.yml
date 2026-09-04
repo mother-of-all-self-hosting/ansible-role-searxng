@@ -366,13 +366,10 @@
     - name: Show the SearXNG verification summary
       ansible.builtin.debug:
         msg:
-          - "systemd: {{ dict(searxng_verify_units | zip(searxng_services.results | map(attribute='status.ActiveState'))) }}"
-          - >-
-            unconfigured image: {{ searxng_control_config.json.instance_name }},
-            limiter {{ searxng_control_config.json.limiter.enabled }},
-            crawler got {{ searxng_control_bot.status }}
-          - "instance name: {{ searxng_config.json.instance_name }}"
-          - "settings reach: safe_search={{ searxng_config.json.safe_search }}, autocomplete={{ searxng_config.json.autocomplete }}"
-          - "limiter: {{ searxng_config.json.limiter }}, crawler got {{ searxng_bot.status }}"
-          - "image: {{ searxng_container.Config.Image }}, process reports {{ searxng_config.json.version }}"
-          - "restarts: {{ dict(searxng_verify_units | zip(searxng_restarts_after.results | map(attribute='status.NRestarts'))) }}"
+          - "SearXNG systemd: {{ dict(searxng_verify_units | zip(searxng_services.results | map(attribute='status.ActiveState'))) }}"
+          - "SearXNG unconfigured image: {{ searxng_control_config.json.instance_name }}, limiter {{ searxng_control_config.json.limiter.enabled }}, crawler got {{ searxng_control_bot.status }}"
+          - "SearXNG instance name: {{ searxng_config.json.instance_name }}"
+          - "SearXNG settings reach: safe_search={{ searxng_config.json.safe_search }}, autocomplete={{ searxng_config.json.autocomplete }}"
+          - "SearXNG limiter: {{ searxng_config.json.limiter }}, crawler got {{ searxng_bot.status }}"
+          - "SearXNG image: {{ searxng_container.Config.Image }}, process reports {{ searxng_config.json.version }}"
+          - "SearXNG restarts: {{ dict(searxng_verify_units | zip(searxng_restarts_after.results | map(attribute='status.NRestarts'))) }}"

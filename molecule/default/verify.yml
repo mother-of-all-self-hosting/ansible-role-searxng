@@ -302,24 +302,15 @@
       register: searxng_image_raw
       changed_when: false
 
-    - name: Assert the SearXNG container runs the version the role names
+    - name: Assert the running SearXNG is the version this role installs
       vars:
         searxng_image_version: "{{ (searxng_image_raw.stdout | from_json)[0].Config.Labels['org.opencontainers.image.version'] }}"
       ansible.builtin.assert:
         that:
           - searxng_container.Config.Image | split(':') | last == searxng_defaults.searxng_version
           - searxng_config.json.version | replace('+', '-') == searxng_image_version
-        fail_msg: >-
-          The running SearXNG does not match what the role installs: container
-          image {{ searxng_container.Config.Image }} (expected the
-          `{{ searxng_defaults.searxng_version }}` tag), image build
-          {{ searxng_image_version }}, process reports
-          {{ searxng_config.json.version }}
-        success_msg: >-
-          The container runs {{ searxng_container.Config.Image }}, the tag
-          `searxng_version` names, and the process inside it reports itself as
-          {{ searxng_config.json.version }} - which is the build that image is
-          labelled with
+        fail_msg: "SearXNG reports {{ searxng_config.json.version | default('none') }}, expected {{ searxng_defaults.searxng_version }}"
+        success_msg: "SearXNG reports {{ searxng_config.json.version }}"
 
     # ------------------------------------------------------------------
     # Nothing was quietly restarting while all of that was being checked

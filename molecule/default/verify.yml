@@ -43,7 +43,7 @@
     # The units are up
     # ------------------------------------------------------------------
 
-    - name: Wait for the systemd services to become active (up to 180s each)
+    - name: Wait for the SearXNG systemd services to become active (up to 180s each)
       ansible.builtin.systemd_service:
         name: "{{ item }}"
       register: searxng_services
@@ -52,7 +52,10 @@
       delay: 5
       loop: "{{ searxng_verify_units }}"
 
-    - name: Assert the systemd services are active
+    # `Restart=always` in the systemd unit means that even a container which crashes
+    # and gets restarted reads as active here, so this is a precondition rather than
+    # a result.
+    - name: Assert the SearXNG systemd services are active
       ansible.builtin.assert:
         that: searxng_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
         fail_msg: >-
@@ -60,7 +63,7 @@
           {{ dict(searxng_verify_units | zip(searxng_services.results | map(attribute='status.ActiveState'))) }}
         success_msg: "Both the Valkey and the SearXNG systemd services are active"
 
-    - name: Retrieve the service logs for debugging
+    - name: Retrieve the SearXNG systemd services log for debugging
       when: searxng_debug_service_enabled | bool
       ansible.builtin.command:
         cmd: "journalctl -xeu {{ item }}"

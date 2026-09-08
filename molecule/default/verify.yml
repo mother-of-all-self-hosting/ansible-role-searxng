@@ -98,16 +98,11 @@
       block:
         - name: Start a SearXNG with none of the role's configuration
           ansible.builtin.command:
-            argv:
-              - docker
-              - run
-              - --detach
-              - --rm
-              - --name
-              - "{{ searxng_verify_control_container }}"
-              - --publish
-              - "127.0.0.1:{{ searxng_verify_control_port }}:8080"
-              - "{{ searxng_container.Config.Image }}"
+            cmd: >-
+              docker run -d --rm
+              --name {{ searxng_verify_control_container }}
+              -p 127.0.0.1:{{ searxng_verify_control_port }}:8080
+              {{ searxng_container.Config.Image }}
           changed_when: true
 
         - name: Wait for the unconfigured SearXNG to come up (up to 5m)
@@ -135,11 +130,7 @@
       always:
         - name: Stop the unconfigured SearXNG
           ansible.builtin.command:
-            argv:
-              - docker
-              - rm
-              - --force
-              - "{{ searxng_verify_control_container }}"
+            cmd: docker rm --force {{ searxng_verify_control_container }}
           changed_when: true
 
     - name: Assert the unconfigured SearXNG reports none of what the role configures

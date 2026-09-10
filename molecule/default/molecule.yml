@@ -31,10 +31,6 @@ provisioner:
         # Helper variables
         searxng_debug_service_enabled: false
 
-        # The container name the role derives from its identifier.
-        # Role defaults are not in scope in a verify play, so it is spelled out.
-        searxng_molecule_container: searxng
-
         # Variables for SearXNG
         searxng_uid: 1000
         searxng_gid: 1000

@@ -33,333 +33,333 @@
   tasks:
     - name: Verify that SearXNG works
       block:
-    # The role is not included in this playbook, so its defaults are not in
-    # scope. Reading defaults/main.yml directly ties the version assertion
-    # below.
-    - name: Load the role defaults
-      ansible.builtin.include_vars:
-        file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
-        name: searxng_defaults
+        # The role is not included in this playbook, so its defaults are not in
+        # scope. Reading defaults/main.yml directly ties the version assertion
+        # below.
+        - name: Load the role defaults
+          ansible.builtin.include_vars:
+            file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+            name: searxng_defaults
 
-    # ------------------------------------------------------------------
-    # The units are up
-    # ------------------------------------------------------------------
+        # ------------------------------------------------------------------
+        # The units are up
+        # ------------------------------------------------------------------
 
-    - name: Wait for the SearXNG systemd services to become active (up to 180s each)
-      ansible.builtin.systemd_service:
-        name: "{{ item }}"
-      register: searxng_services
-      until: searxng_services.status.ActiveState == 'active'
-      retries: 36
-      delay: 5
-      loop: "{{ searxng_verify_units }}"
+        - name: Wait for the SearXNG systemd services to become active (up to 180s each)
+          ansible.builtin.systemd_service:
+            name: "{{ item }}"
+          register: searxng_services
+          until: searxng_services.status.ActiveState == 'active'
+          retries: 36
+          delay: 5
+          loop: "{{ searxng_verify_units }}"
 
-    # `Restart=always` in the systemd unit means that even a container which crashes
-    # and gets restarted reads as active here, so this is a precondition rather than
-    # a result.
-    - name: Assert the SearXNG systemd services are active
-      ansible.builtin.assert:
-        that: searxng_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
-        fail_msg: >-
-          Not every service is active:
-          {{ dict(searxng_verify_units | zip(searxng_services.results | map(attribute='status.ActiveState'))) }}
-        success_msg: "Both the Valkey and the SearXNG systemd services are active"
+        # `Restart=always` in the systemd unit means that even a container which crashes
+        # and gets restarted reads as active here, so this is a precondition rather than
+        # a result.
+        - name: Assert the SearXNG systemd services are active
+          ansible.builtin.assert:
+            that: searxng_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
+            fail_msg: >-
+              Not every service is active:
+              {{ dict(searxng_verify_units | zip(searxng_services.results | map(attribute='status.ActiveState'))) }}
+            success_msg: "Both the Valkey and the SearXNG systemd services are active"
 
-    - name: Retrieve the SearXNG systemd services log for debugging
-      when: searxng_debug_service_enabled | bool
-      ansible.builtin.command:
-        cmd: "journalctl --no-pager --output=cat --unit={{ item }}"
-      changed_when: false
-      loop: "{{ searxng_verify_units }}"
-
-    - name: Inspect SearXNG container
-      ansible.builtin.command:
-        cmd: docker container inspect searxng
-      register: searxng_container_raw
-      changed_when: false
-
-    - name: Parse the SearXNG container definition
-      ansible.builtin.set_fact:
-        searxng_container: "{{ (searxng_container_raw.stdout | from_json)[0] }}"
-
-    # ------------------------------------------------------------------
-    # The negative control: the same image, without the role's doing
-    # ------------------------------------------------------------------
-
-    # SearXNG is a metasearch engine and reaches the public internet to do its
-    # job, so nothing here may depend on a search actually being run. What is
-    # checked instead is what the role configured - and that is only evidence if
-    # the stock image does not report the same things unaided.
-    #
-    # It very nearly might: unlike most images in the fleet, this one needs no
-    # configuration whatsoever. Given none, its entrypoint writes itself a
-    # settings.yml and serves a fully working SearXNG, /healthz included. So the
-    # stock image is asked the same questions first, and every assertion further
-    # down is on a value it answers differently.
-    - name: Probe a SearXNG that the role has not configured
-      block:
-        - name: Start a SearXNG with none of the role's configuration
+        - name: Retrieve the SearXNG systemd services log for debugging
+          when: searxng_debug_service_enabled | bool
           ansible.builtin.command:
-            cmd: >-
-              docker run -d --rm
-              --name {{ searxng_verify_control_container }}
-              -p 127.0.0.1:{{ searxng_verify_control_port }}:8080
-              {{ searxng_container.Config.Image }}
-          changed_when: true
+            cmd: "journalctl --no-pager --output=cat --unit={{ item }}"
+          changed_when: false
+          loop: "{{ searxng_verify_units }}"
 
-        - name: Wait for the unconfigured SearXNG to come up (up to 5m)
+        - name: Inspect SearXNG container
+          ansible.builtin.command:
+            cmd: docker container inspect searxng
+          register: searxng_container_raw
+          changed_when: false
+
+        - name: Parse the SearXNG container definition
+          ansible.builtin.set_fact:
+            searxng_container: "{{ (searxng_container_raw.stdout | from_json)[0] }}"
+
+        # ------------------------------------------------------------------
+        # The negative control: the same image, without the role's doing
+        # ------------------------------------------------------------------
+
+        # SearXNG is a metasearch engine and reaches the public internet to do its
+        # job, so nothing here may depend on a search actually being run. What is
+        # checked instead is what the role configured - and that is only evidence if
+        # the stock image does not report the same things unaided.
+        #
+        # It very nearly might: unlike most images in the fleet, this one needs no
+        # configuration whatsoever. Given none, its entrypoint writes itself a
+        # settings.yml and serves a fully working SearXNG, /healthz included. So the
+        # stock image is asked the same questions first, and every assertion further
+        # down is on a value it answers differently.
+        - name: Probe a SearXNG that the role has not configured
+          block:
+            - name: Start a SearXNG with none of the role's configuration
+              ansible.builtin.command:
+                cmd: >-
+                  docker run -d --rm
+                  --name {{ searxng_verify_control_container }}
+                  -p 127.0.0.1:{{ searxng_verify_control_port }}:8080
+                  {{ searxng_container.Config.Image }}
+              changed_when: true
+
+            - name: Wait for the unconfigured SearXNG to come up (up to 5m)
+              ansible.builtin.uri:
+                url: "{{ searxng_verify_control_url }}/healthz"
+                status_code: [200, -1]
+              register: searxng_control_health
+              until: searxng_control_health.status == 200
+              retries: 60
+              delay: 5
+
+            - name: Ask the unconfigured SearXNG about itself
+              ansible.builtin.uri:
+                url: "{{ searxng_verify_control_url }}/config"
+                status_code: [200]
+              register: searxng_control_config
+
+            - name: Ask the unconfigured SearXNG as a crawler would
+              ansible.builtin.uri:
+                url: "{{ searxng_verify_control_url }}/config"
+                headers:
+                  User-Agent: "{{ searxng_verify_bot_user_agent }}"
+                status_code: [200, 429]
+              register: searxng_control_bot
+          always:
+            - name: Stop the unconfigured SearXNG
+              ansible.builtin.command:
+                cmd: docker rm --force {{ searxng_verify_control_container }}
+              changed_when: true
+
+        - name: Assert the unconfigured SearXNG reports none of what the role configures
+          ansible.builtin.assert:
+            that:
+              - searxng_control_config.json.instance_name != searxng_config_searxng_instance_name
+              - not searxng_control_config.json.limiter.enabled
+              - not searxng_control_config.json.limiter['botdetection.ip_limit.link_token']
+              - searxng_control_config.json.safe_search != 2
+              - searxng_control_config.json.autocomplete != 'google'
+              - searxng_control_config.json.engines | selectattr('name', 'eq', 'wikipedia') | map(attribute='enabled') | list == [true]
+              - searxng_control_bot.status == 200
+            fail_msg: >-
+              The unconfigured SearXNG already reports what this role is supposed to
+              configure, so nothing below can be credited to the role:
+              instance_name={{ searxng_control_config.json.instance_name }},
+              limiter={{ searxng_control_config.json.limiter }},
+              safe_search={{ searxng_control_config.json.safe_search }},
+              autocomplete={{ searxng_control_config.json.autocomplete }},
+              crawler got {{ searxng_control_bot.status }}
+            success_msg: >-
+              The unconfigured SearXNG calls itself
+              "{{ searxng_control_config.json.instance_name }}", runs without a
+              limiter and lets a crawler straight through, so everything below is
+              the role's doing
+
+        # ------------------------------------------------------------------
+        # The role's SearXNG is up
+        # ------------------------------------------------------------------
+
+        # /healthz is the one route the limiter lets past unconditionally, which
+        # makes it the right thing to wait on - but the stock image answers it just
+        # as happily, so it says the process is alive and nothing more.
+        - name: Wait for SearXNG to report itself healthy (up to 5m)
           ansible.builtin.uri:
-            url: "{{ searxng_verify_control_url }}/healthz"
+            url: "{{ searxng_verify_url }}/healthz"
             status_code: [200, -1]
-          register: searxng_control_health
-          until: searxng_control_health.status == 200
+          register: searxng_health
+          until: searxng_health.status == 200
           retries: 60
           delay: 5
 
-        - name: Ask the unconfigured SearXNG about itself
+        - name: Ask SearXNG about itself
           ansible.builtin.uri:
-            url: "{{ searxng_verify_control_url }}/config"
+            url: "{{ searxng_verify_url }}/config"
             status_code: [200]
-          register: searxng_control_config
+          register: searxng_config
 
-        - name: Ask the unconfigured SearXNG as a crawler would
+        # ------------------------------------------------------------------
+        # Configuration reaches the process, not just the files on disk
+        # ------------------------------------------------------------------
+
+        - name: Assert the settings.yml the role wrote reached the running SearXNG
+          ansible.builtin.assert:
+            that:
+              - searxng_config.json.instance_name == searxng_config_searxng_instance_name
+              - searxng_config.json.safe_search == 2
+              - searxng_config.json.autocomplete == 'google'
+              - searxng_config.json.engines | selectattr('name', 'eq', 'wikipedia') | map(attribute='enabled') | list == [false]
+            fail_msg: >-
+              The running SearXNG does not reflect the role's configuration:
+              instance_name={{ searxng_config.json.instance_name }}
+              (expected "{{ searxng_config_searxng_instance_name }}"),
+              safe_search={{ searxng_config.json.safe_search }} (expected 2),
+              autocomplete={{ searxng_config.json.autocomplete }} (expected google),
+              wikipedia={{ searxng_config.json.engines | selectattr('name', 'eq', 'wikipedia') | map(attribute='enabled') | list }}
+              (expected [false])
+            success_msg: >-
+              The running SearXNG calls itself
+              "{{ searxng_config.json.instance_name }}", searches safely, completes
+              with google and has wikipedia switched off - so both
+              `searxng_config_additional_configurations` and
+              `searxng_configuration_extension_yaml` reached it, and the role's
+              recursive merge kept the `search:` keys that came from each
+
+        - name: Retrieve the SearXNG home page
           ansible.builtin.uri:
-            url: "{{ searxng_verify_control_url }}/config"
+            url: "{{ searxng_verify_url }}/"
+            return_content: true
+            follow_redirects: none
+            status_code: [200]
+          register: searxng_home
+
+        - name: Assert SearXNG serves a search page under the configured instance name
+          ansible.builtin.assert:
+            that:
+              - "'<title>' ~ searxng_config_searxng_instance_name ~ '</title>' in searxng_home.content"
+              - "'name=\"q\"' in searxng_home.content"
+            fail_msg: >-
+              The SearXNG home page is not the configured instance's search page:
+              {{ searxng_home.content | truncate(300) }}
+            success_msg: >-
+              The SearXNG home page is titled
+              "{{ searxng_config_searxng_instance_name }}" and carries a search box
+
+        # ------------------------------------------------------------------
+        # The Valkey the role wired up is genuinely connected
+        # ------------------------------------------------------------------
+
+        # `limiter.enabled` is not the setting the role writes - it is SearXNG
+        # reporting whether it installed the limiter, which it only does once both
+        # `server.limiter` is on *and* it has a Valkey client that connected. So a
+        # true here is the Unix socket the role bind-mounts, working end to end.
+        #
+        # `botdetection.ip_limit.link_token` comes from a second file the role
+        # writes, limiter.toml, whose built-in default is false. It travels into the
+        # process by a different path than settings.yml does, so it is worth its own
+        # check.
+        - name: Assert SearXNG installed its limiter against the role's Valkey
+          ansible.builtin.assert:
+            that:
+              - searxng_config.json.limiter.enabled
+              - searxng_config.json.limiter['botdetection.ip_limit.link_token']
+            fail_msg: >-
+              SearXNG did not install its limiter ({{ searxng_config.json.limiter }}).
+              It only does so once it has connected to Valkey, so either
+              `server.limiter` never made it into settings.yml or the Unix socket
+              the role bind-mounts is not reaching the Valkey server.
+            success_msg: >-
+              SearXNG installed its limiter, which means it connected to the Valkey
+              the role bind-mounted a socket for, and read the role's limiter.toml
+              ({{ searxng_config.json.limiter }})
+
+        # Asking the setting is one thing; the limiter actually standing in the way
+        # of a request is another. This route answered 200 a moment ago for
+        # Ansible's own User-Agent, and the only difference here is a User-Agent
+        # that SearXNG's bot detection knows - a filter that is registered with
+        # Flask only when the limiter is installed.
+        - name: Ask SearXNG as a crawler would
+          ansible.builtin.uri:
+            url: "{{ searxng_verify_url }}/config"
             headers:
               User-Agent: "{{ searxng_verify_bot_user_agent }}"
             status_code: [200, 429]
-          register: searxng_control_bot
-      always:
-        - name: Stop the unconfigured SearXNG
+          register: searxng_bot
+
+        - name: Assert the SearXNG limiter turns a crawler away
+          ansible.builtin.assert:
+            that: searxng_bot.status == 429
+            fail_msg: >-
+              A "{{ searxng_verify_bot_user_agent }}" request got
+              {{ searxng_bot.status }}, so the limiter is not filtering requests
+              even though it reports itself installed
+            success_msg: >-
+              A "{{ searxng_verify_bot_user_agent }}" request is turned away with
+              429 while Ansible's own gets 200, so the limiter is filtering requests
+
+        # ------------------------------------------------------------------
+        # The container runs the version its leaf variable names
+        # ------------------------------------------------------------------
+
+        # `searxng_version` is the literal `latest`, and will stay that way for as
+        # long as SearXNG publishes no versions (see defaults/main.yml), so this is
+        # the whole of what the leaf variable can be checked against: the tag the
+        # container was created from.
+        #
+        # `latest` moves, so the image is also asked which build it actually is, and
+        # the running process is asked the same question. SearXNG reports its build
+        # as `<date>+<hash>` where the image labels it `<date>-<hash>`.
+        - name: Read the image the SearXNG container runs
           ansible.builtin.command:
-            cmd: docker rm --force {{ searxng_verify_control_container }}
-          changed_when: true
+            cmd: "docker image inspect {{ searxng_container.Config.Image }}"
+          register: searxng_image_raw
+          changed_when: false
 
-    - name: Assert the unconfigured SearXNG reports none of what the role configures
-      ansible.builtin.assert:
-        that:
-          - searxng_control_config.json.instance_name != searxng_config_searxng_instance_name
-          - not searxng_control_config.json.limiter.enabled
-          - not searxng_control_config.json.limiter['botdetection.ip_limit.link_token']
-          - searxng_control_config.json.safe_search != 2
-          - searxng_control_config.json.autocomplete != 'google'
-          - searxng_control_config.json.engines | selectattr('name', 'eq', 'wikipedia') | map(attribute='enabled') | list == [true]
-          - searxng_control_bot.status == 200
-        fail_msg: >-
-          The unconfigured SearXNG already reports what this role is supposed to
-          configure, so nothing below can be credited to the role:
-          instance_name={{ searxng_control_config.json.instance_name }},
-          limiter={{ searxng_control_config.json.limiter }},
-          safe_search={{ searxng_control_config.json.safe_search }},
-          autocomplete={{ searxng_control_config.json.autocomplete }},
-          crawler got {{ searxng_control_bot.status }}
-        success_msg: >-
-          The unconfigured SearXNG calls itself
-          "{{ searxng_control_config.json.instance_name }}", runs without a
-          limiter and lets a crawler straight through, so everything below is
-          the role's doing
+        - name: Assert the running SearXNG is the version this role installs
+          vars:
+            searxng_image_version: "{{ (searxng_image_raw.stdout | from_json)[0].Config.Labels['org.opencontainers.image.version'] }}"
+          ansible.builtin.assert:
+            that:
+              - searxng_container.Config.Image | split(':') | last == searxng_defaults.searxng_version
+              - searxng_config.json.version | replace('+', '-') == searxng_image_version
+            fail_msg: "SearXNG reports {{ searxng_config.json.version | default('none') }}, expected {{ searxng_defaults.searxng_version }}"
+            success_msg: "SearXNG reports {{ searxng_config.json.version }}"
 
-    # ------------------------------------------------------------------
-    # The role's SearXNG is up
-    # ------------------------------------------------------------------
+        # ------------------------------------------------------------------
+        # Nothing was quietly restarting while all of that was being checked
+        # ------------------------------------------------------------------
 
-    # /healthz is the one route the limiter lets past unconditionally, which
-    # makes it the right thing to wait on - but the stock image answers it just
-    # as happily, so it says the process is alive and nothing more.
-    - name: Wait for SearXNG to report itself healthy (up to 5m)
-      ansible.builtin.uri:
-        url: "{{ searxng_verify_url }}/healthz"
-        status_code: [200, -1]
-      register: searxng_health
-      until: searxng_health.status == 200
-      retries: 60
-      delay: 5
+        # `Restart=always` means a unit reads `active` while it is crash-looping,
+        # and a loop is what a SearXNG that cannot read its settings.yml would
+        # settle into. Restart counters from before this point say nothing, because
+        # SearXNG legitimately restarts while it waits for Valkey - so the window
+        # starts here, with everything already answering.
+        - name: Sample the restart counters
+          ansible.builtin.systemd_service:
+            name: "{{ item }}"
+          register: searxng_restarts_before
+          loop: "{{ searxng_verify_units }}"
 
-    - name: Ask SearXNG about itself
-      ansible.builtin.uri:
-        url: "{{ searxng_verify_url }}/config"
-        status_code: [200]
-      register: searxng_config
+        # Comfortably longer than the unit's `RestartSec=30`, so a crash loop has to
+        # tick at least once inside the window.
+        - name: Watch the services for 45 seconds
+          ansible.builtin.pause:
+            seconds: 45
 
-    # ------------------------------------------------------------------
-    # Configuration reaches the process, not just the files on disk
-    # ------------------------------------------------------------------
+        - name: Sample the restart counters again
+          ansible.builtin.systemd_service:
+            name: "{{ item }}"
+          register: searxng_restarts_after
+          loop: "{{ searxng_verify_units }}"
 
-    - name: Assert the settings.yml the role wrote reached the running SearXNG
-      ansible.builtin.assert:
-        that:
-          - searxng_config.json.instance_name == searxng_config_searxng_instance_name
-          - searxng_config.json.safe_search == 2
-          - searxng_config.json.autocomplete == 'google'
-          - searxng_config.json.engines | selectattr('name', 'eq', 'wikipedia') | map(attribute='enabled') | list == [false]
-        fail_msg: >-
-          The running SearXNG does not reflect the role's configuration:
-          instance_name={{ searxng_config.json.instance_name }}
-          (expected "{{ searxng_config_searxng_instance_name }}"),
-          safe_search={{ searxng_config.json.safe_search }} (expected 2),
-          autocomplete={{ searxng_config.json.autocomplete }} (expected google),
-          wikipedia={{ searxng_config.json.engines | selectattr('name', 'eq', 'wikipedia') | map(attribute='enabled') | list }}
-          (expected [false])
-        success_msg: >-
-          The running SearXNG calls itself
-          "{{ searxng_config.json.instance_name }}", searches safely, completes
-          with google and has wikipedia switched off - so both
-          `searxng_config_additional_configurations` and
-          `searxng_configuration_extension_yaml` reached it, and the role's
-          recursive merge kept the `search:` keys that came from each
+        - name: Assert no service restarted while it was up
+          ansible.builtin.assert:
+            that: >-
+              searxng_restarts_after.results | map(attribute='status.NRestarts') | list
+              == searxng_restarts_before.results | map(attribute='status.NRestarts') | list
+            fail_msg: >-
+              A service restarted while it was supposedly up, so `active` was hiding
+              a crash loop. Before:
+              {{ dict(searxng_verify_units | zip(searxng_restarts_before.results | map(attribute='status.NRestarts'))) }},
+              after:
+              {{ dict(searxng_verify_units | zip(searxng_restarts_after.results | map(attribute='status.NRestarts'))) }}
+            success_msg: >-
+              Neither service restarted over 45 seconds of watching (restarts so far:
+              {{ dict(searxng_verify_units | zip(searxng_restarts_after.results | map(attribute='status.NRestarts'))) }})
 
-    - name: Retrieve the SearXNG home page
-      ansible.builtin.uri:
-        url: "{{ searxng_verify_url }}/"
-        return_content: true
-        follow_redirects: none
-        status_code: [200]
-      register: searxng_home
-
-    - name: Assert SearXNG serves a search page under the configured instance name
-      ansible.builtin.assert:
-        that:
-          - "'<title>' ~ searxng_config_searxng_instance_name ~ '</title>' in searxng_home.content"
-          - "'name=\"q\"' in searxng_home.content"
-        fail_msg: >-
-          The SearXNG home page is not the configured instance's search page:
-          {{ searxng_home.content | truncate(300) }}
-        success_msg: >-
-          The SearXNG home page is titled
-          "{{ searxng_config_searxng_instance_name }}" and carries a search box
-
-    # ------------------------------------------------------------------
-    # The Valkey the role wired up is genuinely connected
-    # ------------------------------------------------------------------
-
-    # `limiter.enabled` is not the setting the role writes - it is SearXNG
-    # reporting whether it installed the limiter, which it only does once both
-    # `server.limiter` is on *and* it has a Valkey client that connected. So a
-    # true here is the Unix socket the role bind-mounts, working end to end.
-    #
-    # `botdetection.ip_limit.link_token` comes from a second file the role
-    # writes, limiter.toml, whose built-in default is false. It travels into the
-    # process by a different path than settings.yml does, so it is worth its own
-    # check.
-    - name: Assert SearXNG installed its limiter against the role's Valkey
-      ansible.builtin.assert:
-        that:
-          - searxng_config.json.limiter.enabled
-          - searxng_config.json.limiter['botdetection.ip_limit.link_token']
-        fail_msg: >-
-          SearXNG did not install its limiter ({{ searxng_config.json.limiter }}).
-          It only does so once it has connected to Valkey, so either
-          `server.limiter` never made it into settings.yml or the Unix socket
-          the role bind-mounts is not reaching the Valkey server.
-        success_msg: >-
-          SearXNG installed its limiter, which means it connected to the Valkey
-          the role bind-mounted a socket for, and read the role's limiter.toml
-          ({{ searxng_config.json.limiter }})
-
-    # Asking the setting is one thing; the limiter actually standing in the way
-    # of a request is another. This route answered 200 a moment ago for
-    # Ansible's own User-Agent, and the only difference here is a User-Agent
-    # that SearXNG's bot detection knows - a filter that is registered with
-    # Flask only when the limiter is installed.
-    - name: Ask SearXNG as a crawler would
-      ansible.builtin.uri:
-        url: "{{ searxng_verify_url }}/config"
-        headers:
-          User-Agent: "{{ searxng_verify_bot_user_agent }}"
-        status_code: [200, 429]
-      register: searxng_bot
-
-    - name: Assert the SearXNG limiter turns a crawler away
-      ansible.builtin.assert:
-        that: searxng_bot.status == 429
-        fail_msg: >-
-          A "{{ searxng_verify_bot_user_agent }}" request got
-          {{ searxng_bot.status }}, so the limiter is not filtering requests
-          even though it reports itself installed
-        success_msg: >-
-          A "{{ searxng_verify_bot_user_agent }}" request is turned away with
-          429 while Ansible's own gets 200, so the limiter is filtering requests
-
-    # ------------------------------------------------------------------
-    # The container runs the version its leaf variable names
-    # ------------------------------------------------------------------
-
-    # `searxng_version` is the literal `latest`, and will stay that way for as
-    # long as SearXNG publishes no versions (see defaults/main.yml), so this is
-    # the whole of what the leaf variable can be checked against: the tag the
-    # container was created from.
-    #
-    # `latest` moves, so the image is also asked which build it actually is, and
-    # the running process is asked the same question. SearXNG reports its build
-    # as `<date>+<hash>` where the image labels it `<date>-<hash>`.
-    - name: Read the image the SearXNG container runs
-      ansible.builtin.command:
-        cmd: "docker image inspect {{ searxng_container.Config.Image }}"
-      register: searxng_image_raw
-      changed_when: false
-
-    - name: Assert the running SearXNG is the version this role installs
-      vars:
-        searxng_image_version: "{{ (searxng_image_raw.stdout | from_json)[0].Config.Labels['org.opencontainers.image.version'] }}"
-      ansible.builtin.assert:
-        that:
-          - searxng_container.Config.Image | split(':') | last == searxng_defaults.searxng_version
-          - searxng_config.json.version | replace('+', '-') == searxng_image_version
-        fail_msg: "SearXNG reports {{ searxng_config.json.version | default('none') }}, expected {{ searxng_defaults.searxng_version }}"
-        success_msg: "SearXNG reports {{ searxng_config.json.version }}"
-
-    # ------------------------------------------------------------------
-    # Nothing was quietly restarting while all of that was being checked
-    # ------------------------------------------------------------------
-
-    # `Restart=always` means a unit reads `active` while it is crash-looping,
-    # and a loop is what a SearXNG that cannot read its settings.yml would
-    # settle into. Restart counters from before this point say nothing, because
-    # SearXNG legitimately restarts while it waits for Valkey - so the window
-    # starts here, with everything already answering.
-    - name: Sample the restart counters
-      ansible.builtin.systemd_service:
-        name: "{{ item }}"
-      register: searxng_restarts_before
-      loop: "{{ searxng_verify_units }}"
-
-    # Comfortably longer than the unit's `RestartSec=30`, so a crash loop has to
-    # tick at least once inside the window.
-    - name: Watch the services for 45 seconds
-      ansible.builtin.pause:
-        seconds: 45
-
-    - name: Sample the restart counters again
-      ansible.builtin.systemd_service:
-        name: "{{ item }}"
-      register: searxng_restarts_after
-      loop: "{{ searxng_verify_units }}"
-
-    - name: Assert no service restarted while it was up
-      ansible.builtin.assert:
-        that: >-
-          searxng_restarts_after.results | map(attribute='status.NRestarts') | list
-          == searxng_restarts_before.results | map(attribute='status.NRestarts') | list
-        fail_msg: >-
-          A service restarted while it was supposedly up, so `active` was hiding
-          a crash loop. Before:
-          {{ dict(searxng_verify_units | zip(searxng_restarts_before.results | map(attribute='status.NRestarts'))) }},
-          after:
-          {{ dict(searxng_verify_units | zip(searxng_restarts_after.results | map(attribute='status.NRestarts'))) }}
-        success_msg: >-
-          Neither service restarted over 45 seconds of watching (restarts so far:
-          {{ dict(searxng_verify_units | zip(searxng_restarts_after.results | map(attribute='status.NRestarts'))) }})
-
-    - name: Show the SearXNG verification summary
-      ansible.builtin.debug:
-        msg:
-          - "SearXNG systemd: {{ dict(searxng_verify_units | zip(searxng_services.results | map(attribute='status.ActiveState'))) }}"
-          - "SearXNG unconfigured image: {{ searxng_control_config.json.instance_name }}, limiter {{ searxng_control_config.json.limiter.enabled }}, crawler got {{ searxng_control_bot.status }}"
-          - "SearXNG instance name: {{ searxng_config.json.instance_name }}"
-          - "SearXNG settings reach: safe_search={{ searxng_config.json.safe_search }}, autocomplete={{ searxng_config.json.autocomplete }}"
-          - "SearXNG limiter: {{ searxng_config.json.limiter }}, crawler got {{ searxng_bot.status }}"
-          - "SearXNG image: {{ searxng_container.Config.Image }}, process reports {{ searxng_config.json.version }}"
-          - "SearXNG restarts: {{ dict(searxng_verify_units | zip(searxng_restarts_after.results | map(attribute='status.NRestarts'))) }}"
+        - name: Show the SearXNG verification summary
+          ansible.builtin.debug:
+            msg:
+              - "SearXNG systemd: {{ dict(searxng_verify_units | zip(searxng_services.results | map(attribute='status.ActiveState'))) }}"
+              - "SearXNG unconfigured image: {{ searxng_control_config.json.instance_name }}, limiter {{ searxng_control_config.json.limiter.enabled }}, crawler got {{ searxng_control_bot.status }}"
+              - "SearXNG instance name: {{ searxng_config.json.instance_name }}"
+              - "SearXNG settings reach: safe_search={{ searxng_config.json.safe_search }}, autocomplete={{ searxng_config.json.autocomplete }}"
+              - "SearXNG limiter: {{ searxng_config.json.limiter }}, crawler got {{ searxng_bot.status }}"
+              - "SearXNG image: {{ searxng_container.Config.Image }}, process reports {{ searxng_config.json.version }}"
+              - "SearXNG restarts: {{ dict(searxng_verify_units | zip(searxng_restarts_after.results | map(attribute='status.NRestarts'))) }}"
 
       rescue:
         # Whatever went wrong, the reason is almost always in the systemd service log.

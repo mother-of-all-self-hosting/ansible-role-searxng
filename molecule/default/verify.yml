@@ -19,16 +19,16 @@
     searxng_verify_control_port: 8099
     searxng_verify_control_url: "http://127.0.0.1:{{ searxng_verify_control_port }}"
 
-    searxng_verify_units:
-      - valkey.service
-      - searxng.service
-
     # SearXNG's bot detection turns away requests whose User-Agent looks like a
     # crawler's, but only once the limiter has been installed. Ansible's own
     # "ansible-httpget" is not on that list, which is why the probes below reach
     # the application at all; this one is, and is used to catch the limiter in
     # the act.
     searxng_verify_bot_user_agent: Scrapy/2.11.0
+
+    searxng_verify_units:
+      - valkey.service
+      - searxng.service
 
   tasks:
     - name: Verify that SearXNG works
@@ -53,6 +53,9 @@
           retries: 36
           delay: 5
           loop: "{{ searxng_verify_units }}"
+          # So that giving up is reported by the assertion below rather than as a
+          # wall of systemd unit properties.
+          failed_when: false
 
         # `Restart=always` in the systemd unit means that even a container which crashes
         # and gets restarted reads as active here, so this is a precondition rather than
@@ -63,7 +66,7 @@
             fail_msg: >-
               Not every service is active:
               {{ dict(searxng_verify_units | zip(searxng_services.results | map(attribute='status.ActiveState'))) }}
-            success_msg: "Both the Valkey and the SearXNG systemd services are active"
+            success_msg: "Every systemd service is active"
 
         - name: Retrieve the SearXNG systemd services log for debugging
           when: searxng_debug_service_enabled | bool
@@ -353,7 +356,7 @@
         - name: Show the SearXNG verification summary
           ansible.builtin.debug:
             msg:
-              - "SearXNG systemd: {{ dict(searxng_verify_units | zip(searxng_services.results | map(attribute='status.ActiveState'))) }}"
+              - "SearXNG systemd: {% for unit, state in searxng_verify_units | zip(searxng_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
               - "SearXNG unconfigured image: {{ searxng_control_config.json.instance_name }}, limiter {{ searxng_control_config.json.limiter.enabled }}, crawler got {{ searxng_control_bot.status }}"
               - "SearXNG instance name: {{ searxng_config.json.instance_name }}"
               - "SearXNG settings reach: safe_search={{ searxng_config.json.safe_search }}, autocomplete={{ searxng_config.json.autocomplete }}"

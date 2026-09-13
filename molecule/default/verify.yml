@@ -319,7 +319,6 @@
             # settle into. Restart counters from before this point say nothing, because
             # SearXNG legitimately restarts while it waits for Valkey - so the window
             # starts here, with everything already answering.
-
             - name: Sample the restart counters
               ansible.builtin.systemd_service:
                 name: "{{ item }}"

@@ -346,18 +346,18 @@
                 fail_msg: >-
                   A service restarted while it was supposedly up, so `active` was hiding a crash loop.
                   Before:
-                  {% for unit, restarts in searxng_verify_units | zip(searxng_restarts_before.results | map(attribute='status.NRestarts')) %}{{ unit }} ({{ restarts }}){% if not loop.last %}, {% endif %}{% endfor %}),
+                  {% for unit, restarts in searxng_verify_units | zip(searxng_restarts_before.results | map(attribute='status.NRestarts')) %}{{ restarts }} ({{ unit }}){% if not loop.last %}, {% endif %}{% endfor %},
                   after:
-                  {% for unit, restarts in searxng_verify_units | zip(searxng_restarts_after.results | map(attribute='status.NRestarts')) %}{{ unit }} ({{ restarts }}){% if not loop.last %}, {% endif %}{% endfor %})
+                  {% for unit, restarts in searxng_verify_units | zip(searxng_restarts_after.results | map(attribute='status.NRestarts')) %}{{ restarts }} ({{ unit }}){% if not loop.last %}, {% endif %}{% endfor %}
                 success_msg: >-
                   None of the services restarted over 45 seconds of watching (restarts so far:
-                  {% for unit, restarts in searxng_verify_units | zip(searxng_restarts_after.results | map(attribute='status.NRestarts')) %}{{ unit }} ({{ restarts }}){% if not loop.last %}, {% endif %}{% endfor %})
+                  {% for unit, restarts in searxng_verify_units | zip(searxng_restarts_after.results | map(attribute='status.NRestarts')) %}{{ restarts }} ({{ unit }}){% if not loop.last %}, {% endif %}{% endfor %})
 
         - name: Show the SearXNG verification summary
           ansible.builtin.debug:
             msg:
               - "SearXNG systemd: {% for unit, state in searxng_verify_units | zip(searxng_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
-              - "SearXNG restarts: {% for unit, restarts in searxng_verify_units | zip(searxng_restarts_after.results | map(attribute='status.NRestarts')) %}{{ unit }} ({{ restarts }}){% if not loop.last %}, {% endif %}{% endfor %}"
+              - "SearXNG restarts: {% for unit, restarts in searxng_verify_units | zip(searxng_restarts_after.results | map(attribute='status.NRestarts')) %}{{ restarts }} ({{ unit }}){% if not loop.last %}, {% endif %}{% endfor %}"
               - "SearXNG unconfigured image: {{ searxng_control_config.json.instance_name }}, limiter {{ searxng_control_config.json.limiter.enabled }}, crawler got {{ searxng_control_bot.status }}"
               - "SearXNG instance name: {{ searxng_config.json.instance_name }}"
               - "SearXNG settings reach: safe_search={{ searxng_config.json.safe_search }}, autocomplete={{ searxng_config.json.autocomplete }}"

@@ -103,7 +103,7 @@ Take a look at:
 
 - [`defaults/main.yml`](../defaults/main.yml) for some variables that you can customize via your `vars.yml` file. You can override settings (even those that don't have dedicated playbook variables) using the `searxng_config_additional_configurations` variable
 
-See the [documentation](https://docs.searxng.org/admin/settings/index.html) for a complete list of SearXNG's config options that you could put in `searxng_config_additional_configurations`.
+See the [documentation](https://docs.searxng.org/admin/settings/index.html) for a complete list of SearXNG's config options that you can put in `searxng_config_additional_configurations`.
 
 ## Installing
 

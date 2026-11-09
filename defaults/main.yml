@@ -271,9 +271,9 @@ searxng_redis_socket_path_host: ""
 
 searxng_environment_variables_redis_url: |-
   {% if searxng_redis_socket_enabled %}
-  unix://{{ searxng_redis_socket_path_container }}{{ searxng_redis_socket_path }}?db={{ searxng_redis_database }}{{ '&password=' + searxng_redis_password if searxng_redis_password }}
+  unix://{{ searxng_redis_socket_path_container }}{{ searxng_redis_socket_path }}?db={{ searxng_redis_database }}{{ '&password=' + (searxng_redis_password | urlencode | replace('/', '%2F')) if searxng_redis_password }}
   {% else %}
-  valkey://:{{ searxng_redis_password }}@{{ searxng_redis_hostname }}:{{ searxng_redis_port }}/{{ searxng_redis_database }}
+  valkey://:{{ searxng_redis_password | urlencode | replace('/', '%2F') }}@{{ searxng_redis_hostname }}:{{ searxng_redis_port }}/{{ searxng_redis_database }}
   {%- endif -%}
 
 ########################################################################

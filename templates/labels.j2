@@ -21,7 +21,7 @@ traefik.http.middlewares.{{ searxng_identifier }}-basic-auth.basicauth.users={{ 
 {% endif %}
 
 {% if searxng_container_labels_traefik_path_prefix != '/' %}
-traefik.http.middlewares.{{ searxng_identifier }}-slashless-redirect.redirectregex.regex=^({{ searxng_container_labels_traefik_path_prefix | quote }})$
+traefik.http.middlewares.{{ searxng_identifier }}-slashless-redirect.redirectregex.regex=^(https?://[^/]+{{ searxng_container_labels_traefik_path_prefix | regex_escape }})$
 traefik.http.middlewares.{{ searxng_identifier }}-slashless-redirect.redirectregex.replacement=${1}/
 {% set middlewares = middlewares + [searxng_identifier + '-slashless-redirect'] %}
 {% endif %}

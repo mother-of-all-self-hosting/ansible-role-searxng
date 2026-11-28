@@ -77,6 +77,7 @@
               {{ searxng_container_network }}
           register: searxng_network_deletion_result
           changed_when: searxng_container_network in searxng_network_deletion_result.stdout
+          failed_when: searxng_network_deletion_result.rc != 0 and 'not found' not in searxng_network_deletion_result.stderr
 
 - name: Check existence of SearXNG local cache path
   ansible.builtin.stat:

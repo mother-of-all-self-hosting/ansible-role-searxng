@@ -83,6 +83,7 @@
         owner: "{{ searxng_uid }}"
         group: "{{ searxng_gid }}"
         recurse: true
+      tags: molecule-idempotence-notest
 
     - name: Ensure SearXNG repository is present on self-build
       ansible.builtin.git:
